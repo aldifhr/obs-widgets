@@ -13,11 +13,6 @@
       --line: #1f232b;
       --text: #e5e7eb;
       --muted: #9ca3af;
-      --accent-1: #ff4655;
-      --accent-2: #ff7b85;
-      --accent-3: #a78bfa;
-      --accent-4: #22d3ee;
-      --accent-5: #fbbf24;
     }
 
     html, body {
@@ -59,10 +54,6 @@
         linear-gradient(160deg, #1a1d24, #0f1115);
       border: 1px solid rgba(255,255,255,0.12);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 18px 40px rgba(0,0,0,0.45);
-    }
-
-    .brand-text {
-      line-height: 1.1;
     }
 
     .brand-text .domain {
@@ -204,9 +195,14 @@
       height: fit-content;
     }
 
+    .tile.disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
     .soon-tag {
       display: inline-flex;
-      margin-top: 12px;
+      margin-top: 14px;
       padding: 5px 10px;
       border-radius: 999px;
       background: rgba(255,255,255,0.06);
@@ -263,7 +259,7 @@
             </div>
             <div class="tile-badge">Widget</div>
           </div>
-        </div>
+        </a>
         <a class="tile" href="/customizer/valorant.html" style="--tile-glow:rgba(255,70,85,0.14)">
           <div class="tile-inner">
             <div class="tile-body">
@@ -272,7 +268,7 @@
             </div>
             <div class="tile-badge">Customizer</div>
           </div>
-        </div>
+        </a>
       </div>
     </div>
 
@@ -282,28 +278,28 @@
         <div class="muted">These widgets will land next.</div>
       </div>
       <div class="row">
-        <div class="tile" style="--tile-glow:rgba(34,211,238,0.10);opacity:0.55;pointer-events:none">
+        <div class="tile disabled" style="--tile-glow:rgba(34,211,238,0.10)">
           <div class="tile-body">
             <h3>Prayer Times</h3>
             <p>Daily prayer times with next salah countdown.</p>
             <div class="soon-tag">Soon</div>
           </div>
         </div>
-        <div class="tile" style="--tile-glow:rgba(34,211,238,0.10);opacity:0.55;pointer-events:none">
+        <div class="tile disabled" style="--tile-glow:rgba(34,211,238,0.10)">
           <div class="tile-body">
             <h3>Prayer Customizer</h3>
             <p>Set location, method, width, and generate the widget URL.</p>
             <div class="soon-tag">Soon</div>
           </div>
         </div>
-        <div class="tile" style="--tile-glow:rgba(167,139,250,0.10);opacity:0.55;pointer-events:none">
+        <div class="tile disabled" style="--tile-glow:rgba(167,139,250,0.10)">
           <div class="tile-body">
             <h3>Countdown</h3>
             <p>Countdown to any event with live seconds ticking.</p>
             <div class="soon-tag">Soon</div>
           </div>
         </div>
-        <div class="tile" style="--tile-glow:rgba(167,139,250,0.10);opacity:0.55;pointer-events:none">
+        <div class="tile disabled" style="--tile-glow:rgba(167,139,250,0.10)">
           <div class="tile-body">
             <h3>Countdown Customizer</h3>
             <p>Set label, target date, width, and copy the widget URL.</p>
