@@ -24,124 +24,41 @@
     }
 
     .wrap {
-      max-width: 1120px;
+      max-width: 960px;
       margin: 0 auto;
-      padding: 36px 24px 64px;
+      padding: 40px 24px 64px;
     }
 
     .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
       border-bottom: 1px solid var(--line);
-      padding: 18px 0 20px;
-      margin-bottom: 34px;
+      padding: 18px 0 22px;
+      margin-bottom: 36px;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background:
-        linear-gradient(135deg, rgba(255,70,85,0.25), rgba(167,139,250,0.25)),
-        linear-gradient(160deg, #1a1d24, #0f1115);
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 18px 40px rgba(0,0,0,0.45);
-    }
-
-    .brand-text .domain {
-      font-size: 1.25em;
+    .domain {
+      font-size: 1.35em;
       font-weight: 900;
-      letter-spacing: -0.2px;
+      letter-spacing: -0.3px;
     }
 
-    .brand-text .tagline {
+    .tagline {
       font-size: 0.78em;
       color: var(--muted);
       font-weight: 600;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.4px;
       text-transform: uppercase;
-    }
-
-    .status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.78em;
-      color: var(--muted);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-    }
-
-    .status::before {
-      content: '';
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 0 0 rgba(16,185,129,0.6);
-      animation: pulse 2.4s infinite;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.55); }
-      70% { box-shadow: 0 0 0 10px rgba(16,185,129,0); }
-      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
-    }
-
-    .section {
-      margin-bottom: 28px;
-    }
-
-    .section-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-
-    .section-title {
-      font-size: 0.72em;
-      color: var(--muted);
-      font-weight: 800;
-      letter-spacing: 1.6px;
-      text-transform: uppercase;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
+      margin-top: 4px;
     }
 
     .tile {
-      position: relative;
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 14px;
       padding: 18px;
       text-decoration: none;
       color: #fff;
-      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-      overflow: hidden;
-    }
-
-    .tile::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 130% -20%, var(--tile-glow, rgba(255,255,255,0.04)), transparent 55%);
-      opacity: 0;
-      transition: opacity 0.18s ease;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+      display: block;
     }
 
     .tile:hover {
@@ -150,168 +67,55 @@
       background: var(--panel-2);
     }
 
-    .tile:hover::after {
-      opacity: 1;
-    }
-
-    .tile-inner {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .tile-body {
-      flex: 1;
-      min-width: 0;
-    }
-
     .tile h3 {
-      font-size: 1em;
+      font-size: 1.05em;
       font-weight: 800;
-      margin: 0 0 4px;
+      margin: 0 0 6px;
     }
 
     .tile p {
       color: var(--muted);
-      font-size: 0.82em;
+      font-size: 0.85em;
       margin: 0;
-      line-height: 1.35;
+      line-height: 1.4;
     }
 
-    .tile-badge {
-      flex-shrink: 0;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.10);
-      color: #cbd5e1;
-      font-size: 0.68em;
-      font-weight: 800;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      height: fit-content;
-    }
-
-    .tile.disabled {
-      opacity: 0.6;
-      pointer-events: none;
-    }
-
-    .soon-tag {
-      display: inline-flex;
-      margin-top: 14px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.10);
-      color: #cbd5e1;
-      font-size: 0.68em;
-      font-weight: 800;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
     }
 
     .footer {
-      margin-top: 38px;
+      margin-top: 40px;
       border-top: 1px solid var(--line);
       padding-top: 18px;
       color: #6b7280;
       font-size: 0.78em;
       font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .muted {
-      color: #6b7280;
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="topbar">
-      <div class="brand">
-        <div class="logo"></div>
-        <div class="brand-text">
-          <div class="domain">obs.aldifhr.fun</div>
-          <div class="tagline">OBS Browser Sources</div>
-        </div>
-      </div>
-      <div class="status">Live</div>
+      <div class="domain">obs.aldifhr.fun</div>
+      <div class="tagline">Valorant · OBS Widgets</div>
     </div>
 
-    <div class="section">
-      <div class="section-head">
-        <div class="section-title">Available</div>
-        <div class="muted">Open a widget, or use a customizer to generate a URL for OBS.</div>
-      </div>
-      <div class="row">
-        <a class="tile" href="/valorant.html" style="--tile-glow:rgba(255,70,85,0.14)">
-          <div class="tile-inner">
-            <div class="tile-body">
-              <h3>Valorant Rank</h3>
-              <p>Live competitive rank, RR progress, and map background.</p>
-            </div>
-            <div class="tile-badge">Widget</div>
-          </div>
-        </a>
-        <a class="tile" href="/customizer/valorant.html" style="--tile-glow:rgba(255,70,85,0.14)">
-          <div class="tile-inner">
-            <div class="tile-body">
-              <h3>Valorant Customizer</h3>
-              <p>Configure colors, width, background, and copy the final URL.</p>
-            </div>
-            <div class="tile-badge">Customizer</div>
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-head">
-        <div class="section-title">Coming next</div>
-        <div class="muted">These widgets will land next.</div>
-      </div>
-      <div class="row">
-        <div class="tile disabled" style="--tile-glow:rgba(34,211,238,0.10)">
-          <div class="tile-body">
-            <h3>Prayer Times</h3>
-            <p>Daily prayer times with next salah countdown.</p>
-            <div class="soon-tag">Soon</div>
-          </div>
-        </div>
-        <div class="tile disabled" style="--tile-glow:rgba(34,211,238,0.10)">
-          <div class="tile-body">
-            <h3>Prayer Customizer</h3>
-            <p>Set location, method, width, and generate the widget URL.</p>
-            <div class="soon-tag">Soon</div>
-          </div>
-        </div>
-        <div class="tile disabled" style="--tile-glow:rgba(167,139,250,0.10)">
-          <div class="tile-body">
-            <h3>Countdown</h3>
-            <p>Countdown to any event with live seconds ticking.</p>
-            <div class="soon-tag">Soon</div>
-          </div>
-        </div>
-        <div class="tile disabled" style="--tile-glow:rgba(167,139,250,0.10)">
-          <div class="tile-body">
-            <h3>Countdown Customizer</h3>
-            <p>Set label, target date, width, and copy the widget URL.</p>
-            <div class="soon-tag">Soon</div>
-          </div>
-        </div>
-      </div>
+    <div class="row">
+      <a class="tile" href="/valorant.html">
+        <h3>Valorant Rank</h3>
+        <p>Live competitive rank, RR progress, rank icon, map background.</p>
+      </a>
+      <a class="tile" href="/customizer/valorant.html">
+        <h3>Valorant Customizer</h3>
+        <p>Configure colors, width, background, and copy the final URL.</p>
+      </a>
     </div>
 
     <div class="footer">
-      <div>obs.aldifhr.fun</div>
-      <div class="muted">Use Browser Source in OBS. Paste a widget URL directly.</div>
+      Paste a widget URL into OBS Browser Source.
     </div>
   </div>
 </body>
