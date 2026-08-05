@@ -3,184 +3,341 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OBS Widgets</title>
+  <title>obs.aldifhr.fun</title>
   <link rel="stylesheet" href="/assets/styles.css">
   <style>
+    :root {
+      --bg: #08090c;
+      --panel: #0f1115;
+      --panel-2: #14171c;
+      --line: #1f232b;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent-1: #ff4655;
+      --accent-2: #ff7b85;
+      --accent-3: #a78bfa;
+      --accent-4: #22d3ee;
+      --accent-5: #fbbf24;
+    }
+
     html, body {
-      background: #0b0d12;
-      color: #e5e7eb;
-      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
       min-height: 100vh;
       margin: 0;
     }
 
-    .hub {
-      max-width: 1100px;
+    .wrap {
+      max-width: 1120px;
       margin: 0 auto;
-      padding: 40px 24px 60px;
+      padding: 36px 24px 64px;
     }
 
-    .hero {
-      text-align: center;
-      margin-bottom: 40px;
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      border-bottom: 1px solid var(--line);
+      padding: 18px 0 20px;
+      margin-bottom: 34px;
     }
 
-    .hero h1 {
-      font-size: 2.4em;
-      font-weight: 900;
-      letter-spacing: -0.5px;
-      margin: 0 0 8px;
-      background: linear-gradient(135deg, #ff4655, #ff7b85, #a78bfa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
 
-    .hero p {
-      color: #9ca3af;
-      font-size: 1.05em;
-      margin: 0;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-
-    .card {
-      position: relative;
-      background: linear-gradient(160deg, rgba(17,20,26,0.95), rgba(11,13,17,0.95));
-      border: 1px solid rgba(255,255,255,0.08);
-      border-left: 4px solid var(--accent, #ff4655);
-      border-radius: 18px;
-      padding: 22px;
-      text-decoration: none;
-      color: #fff;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 120% -10%, var(--accent-glow, rgba(255,70,85,0.18)), transparent 55%);
-      opacity: 0;
-      transition: opacity 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 24px 70px rgba(0,0,0,0.55), inset 0 1px rgba(255,255,255,0.1);
-      border-color: rgba(255,255,255,0.18);
-    }
-
-    .card:hover::before {
-      opacity: 1;
-    }
-
-    .card-inner {
-      position: relative;
-      z-index: 1;
-    }
-
-    .card-icon {
+    .logo {
       width: 40px;
       height: 40px;
       border-radius: 10px;
-      background: linear-gradient(135deg, var(--accent, #ff4655), var(--accent-light, #ff7b85));
+      background:
+        linear-gradient(135deg, rgba(255,70,85,0.25), rgba(167,139,250,0.25)),
+        linear-gradient(160deg, #1a1d24, #0f1115);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 18px 40px rgba(0,0,0,0.45);
+    }
+
+    .brand-text {
+      line-height: 1.1;
+    }
+
+    .brand-text .domain {
+      font-size: 1.25em;
+      font-weight: 900;
+      letter-spacing: -0.2px;
+    }
+
+    .brand-text .tagline {
+      font-size: 0.78em;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .status {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 1.1em;
-      margin-bottom: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-    }
-
-    .card h3 {
-      font-size: 1.1em;
+      gap: 8px;
+      font-size: 0.78em;
+      color: var(--muted);
       font-weight: 700;
-      margin: 0 0 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
     }
 
-    .card p {
-      color: #9ca3af;
-      font-size: 0.88em;
+    .status::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 0 0 rgba(16,185,129,0.6);
+      animation: pulse 2.4s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.55); }
+      70% { box-shadow: 0 0 0 10px rgba(16,185,129,0); }
+      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+    }
+
+    .section {
+      margin-bottom: 28px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 0.72em;
+      color: var(--muted);
+      font-weight: 800;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .tile {
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      text-decoration: none;
+      color: #fff;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      overflow: hidden;
+    }
+
+    .tile::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 130% -20%, var(--tile-glow, rgba(255,255,255,0.04)), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.18s ease;
+    }
+
+    .tile:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.16);
+      background: var(--panel-2);
+    }
+
+    .tile:hover::after {
+      opacity: 1;
+    }
+
+    .tile-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .tile-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tile h3 {
+      font-size: 1em;
+      font-weight: 800;
+      margin: 0 0 4px;
+    }
+
+    .tile p {
+      color: var(--muted);
+      font-size: 0.82em;
       margin: 0;
-      line-height: 1.4;
+      line-height: 1.35;
     }
 
-    .badge {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 4px 10px;
+    .tile-badge {
+      flex-shrink: 0;
+      padding: 5px 10px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.10);
       color: #cbd5e1;
-      font-size: 0.72em;
+      font-size: 0.68em;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      height: fit-content;
+    }
+
+    .footer {
+      margin-top: 38px;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+      color: #6b7280;
+      font-size: 0.78em;
       font-weight: 600;
-      letter-spacing: 0.4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .muted {
+      color: #6b7280;
+    }
+
+    .row.crypto .tile,
+    .row.countdown .tile,
+    .row.prayer .tile {
+      opacity: 0.55;
+    }
+
+    .soon-tag {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 2;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: #cbd5e1;
+      font-size: 0.68em;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
     }
   </style>
 </head>
 <body>
-  <div class="hub">
-    <div class="hero">
-      <h1>OBS Widgets</h1>
-      <p>Overlay widgets for streaming. Open a widget or customizer, then paste the URL into OBS Browser Source.</p>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo"></div>
+        <div class="brand-text">
+          <div class="domain">obs.aldifhr.fun</div>
+          <div class="tagline">OBS Browser Sources</div>
+        </div>
+      </div>
+      <div class="status">Live</div>
     </div>
-    <div class="grid">
-      <a class="card" href="/valorant.html" style="--accent:#ff4655;--accent-light:#ff7b85;--accent-glow:rgba(255,70,85,0.18)">
-        <div class="card-inner">
-          <div class="card-icon">V</div>
-          <h3>Valorant Rank</h3>
-          <p>Live competitive rank, RR progress, rank icon, map backgrounds.</p>
-          <span class="badge">Widget</span>
-        </div>
-      </a>
-      <a class="card" href="/customizer/valorant.html" style="--accent:#ff4655;--accent-light:#ff7b85;--accent-glow:rgba(255,70,85,0.18)">
-        <div class="card-inner">
-          <div class="card-icon">V</div>
-          <h3>Valorant Customizer</h3>
-          <p>Configure colors, width, background, and copy the final URL.</p>
-          <span class="badge">Customizer</span>
-        </div>
-      </a>
-      <a class="card" href="/widgets/prayer.html" style="--accent:#22d3ee;--accent-light:#67e8f9;--accent-glow:rgba(34,211,238,0.18)">
-        <div class="card-inner">
-          <div class="card-icon">P</div>
-          <h3>Prayer Times</h3>
-          <p>Daily prayer times with next salah countdown.</p>
-          <span class="badge">Widget</span>
-        </div>
-      </a>
-      <a class="card" href="/customizer/prayer.html" style="--accent:#22d3ee;--accent-light:#67e8f9;--accent-glow:rgba(34,211,238,0.18)">
-        <div class="card-inner">
-          <div class="card-icon">P</div>
-          <h3>Prayer Customizer</h3>
-          <p>Set location, method, width, and generate the widget URL.</p>
-          <span class="badge">Customizer</span>
-        </div>
-      </a>
-      <a class="card" href="/widgets/countdown.html" style="--accent:#a78bfa;--accent-light:#c4b5fd;--accent-glow:rgba(167,139,250,0.18)">
-        <div class="card-inner">
-          <div class="card-icon">C</div>
-          <h3>Countdown</h3>
-          <p>Countdown to any event with live seconds ticking.</p>
-          <span class="badge">Widget</span>
-        </div>
-      </a>
-      <a class="card" href="/customizer/countdown.html" style="--accent:#a78bfa;--accent-light:#c4b5fd;--accent-glow:rgba(167,139,250,0.18)">
-        <div class="card-inner">
-          <div class="card-icon">C</div>
-          <h3>Countdown Customizer</h3>
-          <p>Set label, target date, width, and copy the widget URL.</p>
-          <span class="badge">Customizer</span>
-        </div>
-      </a>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">Available</div>
+        <div class="muted">Open a widget, or use a customizer to generate a URL for OBS.</div>
+      </div>
+      <div class="row">
+        <a class="tile" href="/valorant.html" style="--tile-glow:rgba(255,70,85,0.14)">
+          <div class="tile-inner">
+            <div class="tile-body">
+              <h3>Valorant Rank</h3>
+              <p>Live competitive rank, RR progress, and map background.</p>
+            </div>
+            <div class="tile-badge">Widget</div>
+          </div>
+        </a>
+        <a class="tile" href="/customizer/valorant.html" style="--tile-glow:rgba(255,70,85,0.14)">
+          <div class="tile-inner">
+            <div class="tile-body">
+              <h3>Valorant Customizer</h3>
+              <p>Configure colors, width, background, and copy the final URL.</p>
+            </div>
+            <div class="tile-badge">Customizer</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">Coming next</div>
+        <div class="muted">These widgets will land next.</div>
+      </div>
+      <div class="row prayer">
+        <a class="tile" href="/widgets/prayer.html" style="--tile-glow:rgba(34,211,238,0.10)">
+          <span class="soon-tag">Soon</span>
+          <div class="tile-inner">
+            <div class="tile-body">
+              <h3>Prayer Times</h3>
+              <p>Daily prayer times with next salah countdown.</p>
+            </div>
+            <div class="tile-badge">Widget</div>
+          </div>
+        </a>
+        <a class="tile" href="/customizer/prayer.html" style="--tile-glow:rgba(34,211,238,0.10)">
+          <span class="soon-tag">Soon</span>
+          <div class="tile-inner">
+            <div class="tile-body">
+              <h3>Prayer Customizer</h3>
+              <p>Set location, method, width, and generate the widget URL.</p>
+            </div>
+            <div class="tile-badge">Customizer</div>
+          </div>
+        </a>
+      </div>
+      <div class="row countdown" style="margin-top:12px">
+        <a class="tile" href="/widgets/countdown.html" style="--tile-glow:rgba(167,139,250,0.10)">
+          <span class="soon-tag">Soon</span>
+          <div class="tile-inner">
+            <div class="tile-body">
+              <h3>Countdown</h3>
+              <p>Countdown to any event with live seconds ticking.</p>
+            </div>
+            <div class="tile-badge">Widget</div>
+          </div>
+        </a>
+        <a class="tile" href="/customizer/countdown.html" style="--tile-glow:rgba(167,139,250,0.10)">
+          <span class="soon-tag">Soon</span>
+          <div class="tile-inner">
+            <div class="tile-body">
+              <h3>Countdown Customizer</h3>
+              <p>Set label, target date, width, and copy the widget URL.</p>
+            </div>
+            <div class="tile-badge">Customizer</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>obs.aldifhr.fun</div>
+      <div class="muted">Use Browser Source in OBS. Paste a widget URL directly.</div>
     </div>
   </div>
 </body>
