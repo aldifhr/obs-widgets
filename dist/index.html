@@ -204,6 +204,20 @@
       height: fit-content;
     }
 
+    .soon-tag {
+      display: inline-flex;
+      margin-top: 12px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: #cbd5e1;
+      font-size: 0.68em;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
     .footer {
       margin-top: 38px;
       border-top: 1px solid var(--line);
@@ -219,28 +233,6 @@
 
     .muted {
       color: #6b7280;
-    }
-
-    .row.crypto .tile,
-    .row.countdown .tile,
-    .row.prayer .tile {
-      opacity: 0.55;
-    }
-
-    .soon-tag {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      z-index: 2;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.10);
-      color: #cbd5e1;
-      font-size: 0.68em;
-      font-weight: 800;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
     }
   </style>
 </head>
@@ -289,47 +281,33 @@
         <div class="section-title">Coming next</div>
         <div class="muted">These widgets will land next.</div>
       </div>
-      <div class="row prayer">
+      <div class="row">
         <a class="tile" href="/widgets/prayer.html" style="--tile-glow:rgba(34,211,238,0.10)">
-          <span class="soon-tag">Soon</span>
-          <div class="tile-inner">
-            <div class="tile-body">
-              <h3>Prayer Times</h3>
-              <p>Daily prayer times with next salah countdown.</p>
-            </div>
-            <div class="tile-badge">Widget</div>
+          <div class="tile-body">
+            <h3>Prayer Times</h3>
+            <p>Daily prayer times with next salah countdown.</p>
+            <div class="soon-tag">Soon</div>
           </div>
         </a>
         <a class="tile" href="/customizer/prayer.html" style="--tile-glow:rgba(34,211,238,0.10)">
-          <span class="soon-tag">Soon</span>
-          <div class="tile-inner">
-            <div class="tile-body">
-              <h3>Prayer Customizer</h3>
-              <p>Set location, method, width, and generate the widget URL.</p>
-            </div>
-            <div class="tile-badge">Customizer</div>
+          <div class="tile-body">
+            <h3>Prayer Customizer</h3>
+            <p>Set location, method, width, and generate the widget URL.</p>
+            <div class="soon-tag">Soon</div>
           </div>
         </a>
-      </div>
-      <div class="row countdown" style="margin-top:12px">
         <a class="tile" href="/widgets/countdown.html" style="--tile-glow:rgba(167,139,250,0.10)">
-          <span class="soon-tag">Soon</span>
-          <div class="tile-inner">
-            <div class="tile-body">
-              <h3>Countdown</h3>
-              <p>Countdown to any event with live seconds ticking.</p>
-            </div>
-            <div class="tile-badge">Widget</div>
+          <div class="tile-body">
+            <h3>Countdown</h3>
+            <p>Countdown to any event with live seconds ticking.</p>
+            <div class="soon-tag">Soon</div>
           </div>
         </a>
         <a class="tile" href="/customizer/countdown.html" style="--tile-glow:rgba(167,139,250,0.10)">
-          <span class="soon-tag">Soon</span>
-          <div class="tile-inner">
-            <div class="tile-body">
-              <h3>Countdown Customizer</h3>
-              <p>Set label, target date, width, and copy the widget URL.</p>
-            </div>
-            <div class="tile-badge">Customizer</div>
+          <div class="tile-body">
+            <h3>Countdown Customizer</h3>
+            <p>Set label, target date, width, and copy the widget URL.</p>
+            <div class="soon-tag">Soon</div>
           </div>
         </a>
       </div>
