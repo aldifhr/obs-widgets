@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OBS Widgets</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module">
+    const app = document.getElementById('app');
+    app.innerHTML = `
+      <div class="hub">
+        <h1>OBS Widgets</h1>
+        <p class="sub">Pick a widget below, then copy its URL into OBS Browser Source.</p>
+        <div class="grid">
+          <a class="card" href="/widgets/valorant.html" style="--accent:#ff4655">
+            <h3>Valorant Rank</h3>
+            <p>Live rank + RR with map backgrounds.</p>
+          </a>
+          <a class="card" href="/widgets/prayer.html" style="--accent:#22d3ee">
+            <h3>Prayer Times</h3>
+            <p>Daily prayer times with next salah countdown.</p>
+          </a>
+          <a class="card" href="/widgets/countdown.html" style="--accent:#a78bfa">
+            <h3>Countdown</h3>
+            <p>Event countdown, configurable via query params.</p>
+          </a>
+          <a class="card" href="/widgets/weather.html" style="--accent:#34d399">
+            <h3>Weather</h3>
+            <p>Compact weather by city via Open-Meteo.</p>
+          </a>
+          <a class="card" href="/widgets/crypto.html" style="--accent:#fbbf24">
+            <h3>Crypto Ticker</h3>
+            <p>Price + 24h change for BTC, ETH, SOL.</p>
+          </a>
+        </div>
+      </div>
+    `;
+  </script>
+</body>
+</html>

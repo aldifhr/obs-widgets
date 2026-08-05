@@ -1,0 +1,50 @@
+import './shared/styles.css';
+
+function render() {
+  const app = document.getElementById('app')!;
+  const params = new URLSearchParams(location.search);
+  const target = params.get('to') || '';
+  const label = params.get('label') || 'Event';
+  const width = params.get('w') || '380';
+
+  app.innerHTML = `
+    <div class="widget" style="--w:${width}px;--p:18px 20px;--r:14px">
+      <div style="font-size:0.75em;color:#9ca3af;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">${label}</div>
+      <div id="countdown-display" style="font-size:1.6em;font-weight:800;letter-spacing:0.5px;line-height:1.2">--:--:--</div>
+      <div id="countdown-date" style="font-size:0.8em;color:#9ca3af;margin-top:4px"></div>
+    </div>
+  `;
+
+  const display = document.getElementById('countdown-display')!;
+  const dateEl = document.getElementById('countdown-date')!;
+  const targetDate = new Date(target);
+
+  if (!target || isNaN(targetDate.getTime())) {
+    display.textContent = 'Set ?to=ISO_DATE';
+    return;
+  }
+
+  dateEl.textContent = targetDate.toLocaleString();
+
+  function update() {
+    const now = new Date();
+    let diff = Math.max(0, Math.floor((targetDate.getTime() - now.getTime()) / 1000));
+    
+    const d = Math.floor(diff / 86400);
+    diff %= 86400;
+    const h = Math.floor(diff / 3600);
+    diff %= 3600;
+    const m = Math.floor(diff / 60);
+    const s = diff % 60;
+
+    const parts = [];
+    if (d > 0) parts.push(`${d}d`);
+    parts.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
+    display.textContent = parts.join(' ');
+  }
+
+  update();
+  setInterval(update, 1000);
+}
+
+render();

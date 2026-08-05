@@ -1,0 +1,39 @@
+import './shared/styles.css';
+
+function render() {
+  const app = document.getElementById('app')!;
+  const params = new URLSearchParams(location.search);
+  const ids = params.get('ids') || 'bitcoin,ethereum,solana';
+  const width = params.get('w') || '420';
+
+  app.innerHTML = `
+    <div class="widget" style="--w:${width}px;--p:16px 18px;--r:14px">
+      <div style="font-size:0.75em;color:#9ca3af;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Crypto</div>
+      <div id="crypto-content" style="color:#e5e7eb">
+        <div style="padding:6px 0;color:#9ca3af">Loading...</div>
+      </div>
+    </div>
+  `;
+
+  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
+  fetch(url).then(r => r.json()).then(data => {
+    const symbols: Record<string, string> = { bitcoin: 'BTC', ethereum: 'ETH', solana: 'SOL' };
+    const rows = Object.entries(data).map(([coin, info]: [string, any]) => {
+      const symbol = symbols[coin] || coin.toUpperCase().slice(0, 4);
+      const price = info.usd != null ? info.usd.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) : '--';
+      const change = info.usd_24h_change;
+      const color = change == null ? '#9ca3af' : change >= 0 ? '#34d399' : '#f87171';
+      const arrow = change == null ? '' : change >= 0 ? '▲' : '▼';
+      return `<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:0.95em;font-weight:500">
+        <span style="font-weight:700">${symbol}</span>
+        <span style="font-variant-numeric:tabular-nums;font-weight:700;margin-right:8px">${price}</span>
+        <span style="color:${color};font-size:0.85em;font-weight:700;min-width:52px;text-align:right">${arrow} ${change != null ? change.toFixed(1) : '0.0'}%</span>
+      </div>`;
+    }).join('');
+    document.getElementById('crypto-content')!.innerHTML = rows || `<div style="color:#f87171">No data</div>`;
+  }).catch(() => {
+    document.getElementById('crypto-content')!.innerHTML = `<div style="color:#f87171">CoinGecko unavailable</div>`;
+  });
+}
+
+render();

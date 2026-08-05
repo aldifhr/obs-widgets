@@ -1,0 +1,13 @@
+{
+  "name": "obs-widgets",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc && vite build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^8.0.1"
+  }
+}
