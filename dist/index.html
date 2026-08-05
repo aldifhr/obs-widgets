@@ -5,6 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBS Widgets</title>
   <link rel="stylesheet" href="/assets/styles.css">
+  <style>
+    html, body {
+      background: #0b0d12;
+      color: #e5e7eb;
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .hub { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+    .hub h1 { font-size: 1.7em; font-weight: 900; margin-bottom: 6px; letter-spacing: 0.2px; }
+    .hub .sub { color: #9ca3af; font-size: 0.95em; margin-bottom: 22px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .card {
+      background: linear-gradient(160deg, rgba(17,20,26,0.95), rgba(11,13,17,0.95));
+      border: 1px solid rgba(255,255,255,0.10);
+      border-left: 4px solid var(--accent, #ff4655);
+      border-radius: 16px;
+      padding: 18px;
+      text-decoration: none;
+      color: #fff;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 60px rgba(0,0,0,0.55), inset 0 1px rgba(255,255,255,0.08);
+    }
+    .card h3 { font-size: 1.05em; font-weight: 700; margin-bottom: 4px; }
+    .card p { color: #9ca3af; font-size: 0.85em; }
+  </style>
 </head>
 <body>
   <div id="app"></div>
@@ -13,27 +42,31 @@
     app.innerHTML = `
       <div class="hub">
         <h1>OBS Widgets</h1>
-        <p class="sub">Pick a widget below, then copy its URL into OBS Browser Source.</p>
+        <p class="sub">Pick a widget below, or open its customizer to generate a live URL for OBS.</p>
         <div class="grid">
-          <a class="card" href="/widgets/valorant.html" style="--accent:#ff4655">
+          <a class="card" href="/valorant.html" style="--accent:#ff4655">
             <h3>Valorant Rank</h3>
             <p>Live rank + RR with map backgrounds.</p>
+          </a>
+          <a class="card" href="/customizer/valorant.html" style="--accent:#ff4655">
+            <h3>Valorant Customizer</h3>
+            <p>Configure rank widget + copy URL.</p>
           </a>
           <a class="card" href="/widgets/prayer.html" style="--accent:#22d3ee">
             <h3>Prayer Times</h3>
             <p>Daily prayer times with next salah countdown.</p>
           </a>
+          <a class="card" href="/customizer/prayer.html" style="--accent:#22d3ee">
+            <h3>Prayer Customizer</h3>
+            <p>Configure prayer widget + copy URL.</p>
+          </a>
           <a class="card" href="/widgets/countdown.html" style="--accent:#a78bfa">
             <h3>Countdown</h3>
             <p>Event countdown, configurable via query params.</p>
           </a>
-          <a class="card" href="/widgets/weather.html" style="--accent:#34d399">
-            <h3>Weather</h3>
-            <p>Compact weather by city via Open-Meteo.</p>
-          </a>
-          <a class="card" href="/widgets/crypto.html" style="--accent:#fbbf24">
-            <h3>Crypto Ticker</h3>
-            <p>Price + 24h change for BTC, ETH, SOL.</p>
+          <a class="card" href="/customizer/countdown.html" style="--accent:#a78bfa">
+            <h3>Countdown Customizer</h3>
+            <p>Configure countdown + copy URL.</p>
           </a>
         </div>
       </div>

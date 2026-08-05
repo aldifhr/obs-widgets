@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prayer Times Customizer</title>
+  <link rel="stylesheet" href="/assets/customizer.css">
+</head>
+<body>
+  <div class="customizer">
+    <div class="header">
+      <h1>Prayer Times Customizer</h1>
+      <p>Configure your widget, preview it live, then copy the URL into OBS.</p>
+    </div>
+    <div class="layout">
+      <div class="panel settings-panel">
+        <h2 class="panel-title">Settings</h2>
+        <div class="field">
+          <label class="field-label" for="city">City</label>
+          <input type="text" id="city" class="input" value="Jakarta">
+        </div>
+        <div class="field">
+          <label class="field-label" for="lat">Latitude</label>
+          <input type="text" id="lat" class="input" value="-6.2088">
+        </div>
+        <div class="field">
+          <label class="field-label" for="lng">Longitude</label>
+          <input type="text" id="lng" class="input" value="106.8456">
+        </div>
+        <div class="field">
+          <label class="field-label" for="method">Calculation Method</label>
+          <select id="method" class="input">
+            <option value="ISNA">ISNA</option>
+            <option value="Makkah">Makkah</option>
+            <option value="Egypt">Egypt</option>
+            <option value="Karachi">Karachi</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="w">Width</label>
+          <input type="range" id="w" class="input range-input" value="340" min="280" max="520" step="10">
+          <span id="w-val">340</span>
+        </div>
+        <button class="btn btn-primary" id="copy-url">Copy Widget URL</button>
+        <button class="btn btn-secondary" id="reset">Restore defaults</button>
+      </div>
+      <div class="panel preview-panel">
+        <h2 class="panel-title">Preview</h2>
+        <div id="preview-widget" class="preview-area"></div>
+        <div class="field" style="margin-top:12px">
+          <label class="field-label">Widget URL</label>
+          <div class="url-box">
+            <input type="text" id="widget-url" class="url-input" readonly>
+            <button class="btn btn-primary" id="copy-url-2" style="width:auto;padding:10px 14px">Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    const METHODS = { 'Makkah': 10, 'Egypt': 5, 'Karachi': 1, 'ISNA': 2 };
+
+    async function getPrayerTimes(lat, lng, method) {
+      const t = Math.floor(Date.now() / 1000);
+      const r = await fetch(`https://api.aladhan.com/v1/timings/${t}?latitude=${lat}&longitude=${lng}&method=${METHODS[method] || 2}`);
+      const j = await r.json();
+      return j.data.timings;
+    }
+
+    function getNextPrayer(timings) {
+      const now = new Date();
+      const current = now.getHours() * 60 + now.getMinutes();
+      const NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+      for (const name of NAMES) {
+        if (!timings[name]) continue;
+        const [h, m] = timings[name].split(':').map(Number);
+        if (h * 60 + m > current) {
+          const diff = (h * 60 + m) - current;
+          return { name, time: timings[name], diff: `${Math.floor(diff/60)}h ${diff%60}m` };
+        }
+      }
+      const [h, m] = timings['Fajr'].split(':').map(Number);
+      const diff = (24*60 - current) + (h*60 + m);
+      return { name: 'Fajr', time: timings['Fajr'], diff: `${Math.floor(diff/60)}h ${diff%60}m` };
+    }
+
+    const defaults = { city: 'Jakarta', lat: '-6.2088', lng: '106.8456', method: 'ISNA', w: '340' };
+    let cfg = { ...defaults };
+
+    function readInputs() {
+      cfg.city = document.getElementById('city').value.trim();
+      cfg.lat = document.getElementById('lat').value.trim();
+      cfg.lng = document.getElementById('lng').value.trim();
+      cfg.method = document.getElementById('method').value;
+      cfg.w = document.getElementById('w').value;
+      document.getElementById('w-val').textContent = cfg.w;
+    }
+
+    function buildUrl() {
+      const u = new URL('/widgets/prayer.html', location.origin);
+      u.searchParams.set('lat', cfg.lat);
+      u.searchParams.set('lng', cfg.lng);
+      u.searchParams.set('city', cfg.city);
+      u.searchParams.set('method', cfg.method);
+      if (cfg.w !== '340') u.searchParams.set('w', cfg.w);
+      return u.toString();
+    }
+
+    async function renderPreview() {
+      const previewEl = document.getElementById('preview-widget');
+      previewEl.innerHTML = '<div style="color:#9ca3af">Loading...</div>';
+      try {
+        const timings = await getPrayerTimes(parseFloat(cfg.lat), parseFloat(cfg.lng), cfg.method);
+        const next = getNextPrayer(timings);
+        const NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const rows = NAMES.map(n => {
+          const time = timings[n] || '--:--';
+          const active = next && next.name === n;
+          return `<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:0.95em;font-weight:${active?700:500};color:${active?'#fff':'#d1d5db'}">
+            <span>${n}</span><span style="font-variant-numeric:tabular-nums;font-weight:700">${time}</span></div>`;
+        }).join('');
+        const nextHtml = next ? `<div style="margin-top:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12)">
+          <div style="font-size:0.7em;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:1px">Next Prayer</div>
+          <div style="font-size:1.3em;font-weight:800;margin-top:2px">${next.name}</div>
+          <div style="font-size:0.8em;color:#9ca3af">in ${next.diff} · ${next.time}</div></div>` : '';
+        document.getElementById('preview-widget').innerHTML = `<div class="widget" style="--w:${cfg.w}px;--p:18px 20px;--r:14px">
+          <div style="font-size:0.75em;color:#9ca3af;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Prayer Times</div>
+          <div style="color:#e5e7eb"><div style="font-size:0.7em;color:#9ca3af;font-weight:600;margin-bottom:6px">${escapeHtml(cfg.city)} · ${cfg.method}</div>${rows}${nextHtml}</div>
+        </div>`;
+        document.getElementById('widget-url').value = buildUrl();
+      } catch {
+        document.getElementById('preview-widget').innerHTML = '<div style="color:#f87171">Failed to load</div>';
+        document.getElementById('widget-url').value = '';
+      }
+    }
+
+    function escapeHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function bind(id, event, fn) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener(event, () => { fn(); renderPreview(); });
+    }
+
+    bind('city', 'input', () => readInputs());
+    bind('lat', 'input', () => readInputs());
+    bind('lng', 'input', () => readInputs());
+    bind('method', 'change', () => readInputs());
+    bind('w', 'input', () => readInputs());
+
+    document.getElementById('copy-url').addEventListener('click', copy);
+    document.getElementById('copy-url-2').addEventListener('click', copy);
+    document.getElementById('reset').addEventListener('click', () => {
+      cfg = { ...defaults };
+      document.getElementById('city').value = defaults.city;
+      document.getElementById('lat').value = defaults.lat;
+      document.getElementById('lng').value = defaults.lng;
+      document.getElementById('method').value = defaults.method;
+      document.getElementById('w').value = defaults.w;
+      renderPreview();
+    });
+
+    function copy() {
+      const input = document.getElementById('widget-url');
+      if (!input.value) return;
+      input.select();
+      document.execCommand('copy');
+      const btn = document.getElementById('copy-url');
+      const btn2 = document.getElementById('copy-url-2');
+      const old = btn.textContent;
+      btn.textContent = 'Copied!';
+      if (btn2) btn2.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = old; if (btn2) btn2.textContent = 'Copy'; }, 1500);
+    }
+
+    readInputs();
+    renderPreview();
+  </script>
+</body>
+</html>
