@@ -20,6 +20,22 @@ interface MapOption {
   displayIcon?: string;
 }
 
+const PRESETS: Record<string, { label: string; accent: string; accentLight: string; accentGlow: string }> = {
+  default: { label: 'Default', accent: '#ff4655', accentLight: '#ff7b85', accentGlow: 'rgba(255,70,85,0.28)' },
+  radiance: { label: 'Radiance', accent: '#f59e0b', accentLight: '#fcd34d', accentGlow: 'rgba(245,158,11,0.30)' },
+  abyss: { label: 'Abyss', accent: '#06b6d4', accentLight: '#67e8f9', accentGlow: 'rgba(6,182,212,0.30)' },
+  minimalis: { label: 'Minimalis', accent: '#e5e7eb', accentLight: '#9ca3af', accentGlow: 'rgba(255,255,255,0.15)' },
+};
+
+const FONTS = [
+  { value: "'Segoe UI', 'Bahnschrift', Arial, sans-serif", label: 'Segoe UI' },
+  { value: "'Inter', system-ui, sans-serif", label: 'Inter' },
+  { value: "'Bahnschrift', 'Segoe UI', Arial, sans-serif", label: 'Bahnschrift' },
+  { value: "'Arial', 'Helvetica', sans-serif", label: 'Arial' },
+  { value: "'Georgia', serif", label: 'Georgia' },
+  { value: "'Courier New', monospace", label: 'Monospace' },
+];
+
 const inputCls =
   'w-full rounded-lg border border-[#262a33] bg-[#0f1115] px-3 py-2 text-sm text-gray-200 placeholder:text-gray-600 focus:border-[#ff4655] focus:outline-none';
 const labelCls = 'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400';
@@ -43,6 +59,24 @@ export default function ValorantCustomizer() {
 
   const set = <K extends keyof WidgetConfig>(key: K, value: WidgetConfig[K]) =>
     setConfig((c) => ({ ...c, [key]: value }));
+
+  const setColor = (key: 'accent' | 'accentLight' | 'accentGlow', value: string) =>
+    setConfig((c) => ({ ...c, [key]: value, preset: 'default' }));
+
+  const applyPreset = (key: string) => {
+    const p = PRESETS[key];
+    if (!p) return;
+    setConfig((c) => ({ ...c, preset: key, accent: p.accent, accentLight: p.accentLight, accentGlow: p.accentGlow }));
+  };
+
+  const currentPreset =
+    Object.keys(PRESETS).find((k) => {
+      const p = PRESETS[k];
+      return p.accent === config.accent && p.accentLight === config.accentLight && p.accentGlow === config.accentGlow;
+    }) || 'default';
+
+  const padding = parseInt(config.cardPadding, 10) || 22;
+  const setPadding = (n: number) => set('cardPadding', `${n}px ${n + 2}px`);
 
   useEffect(() => {
     let active = true;
@@ -169,13 +203,23 @@ export default function ValorantCustomizer() {
             </select>
           </Field>
 
+          <Field label="Preset Theme">
+            <select className={inputCls} value={currentPreset} onChange={(e) => applyPreset(e.target.value)}>
+              {Object.entries(PRESETS).map(([key, p]) => (
+                <option key={key} value={key}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+
           <div className="grid grid-cols-2 gap-3">
             <Field label="Accent">
               <input
                 type="color"
                 className="h-10 w-full cursor-pointer rounded-lg border border-[#262a33] bg-[#0f1115]"
                 value={config.accent}
-                onChange={(e) => set('accent', e.target.value)}
+                onChange={(e) => setColor('accent', e.target.value)}
               />
             </Field>
             <Field label="Accent Light">
@@ -183,7 +227,7 @@ export default function ValorantCustomizer() {
                 type="color"
                 className="h-10 w-full cursor-pointer rounded-lg border border-[#262a33] bg-[#0f1115]"
                 value={config.accentLight}
-                onChange={(e) => set('accentLight', e.target.value)}
+                onChange={(e) => setColor('accentLight', e.target.value)}
               />
             </Field>
           </div>
@@ -198,6 +242,44 @@ export default function ValorantCustomizer() {
               value={config.cardWidth}
               onChange={(e) => set('cardWidth', parseInt(e.target.value, 10))}
             />
+          </Field>
+
+          <Field label={`Card Radius · ${config.cardRadius}px`}>
+            <input
+              type="range"
+              className="w-full accent-[#ff4655]"
+              min={6}
+              max={28}
+              step={1}
+              value={config.cardRadius}
+              onChange={(e) => set('cardRadius', parseInt(e.target.value, 10))}
+            />
+          </Field>
+
+          <Field label={`Card Padding · ${padding}px`}>
+            <input
+              type="range"
+              className="w-full accent-[#ff4655]"
+              min={10}
+              max={40}
+              step={1}
+              value={padding}
+              onChange={(e) => setPadding(parseInt(e.target.value, 10))}
+            />
+          </Field>
+
+          <Field label="Font Family">
+            <select
+              className={inputCls}
+              value={config.fontFamily}
+              onChange={(e) => set('fontFamily', e.target.value)}
+            >
+              {FONTS.map((f) => (
+                <option key={f.value} value={f.value}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
           </Field>
 
           <Field label={`Font Size · ${config.fontSizeScale.toFixed(2)}`}>
