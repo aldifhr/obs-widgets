@@ -33,7 +33,7 @@ export function detectEvents(
   data: { tierNumber: number; rr: number },
   lastMatch: { id: string; result: 'win' | 'lose' | 'tie' } | null,
 ): WidgetEvent[] {
-  const isNewMatch = !!lastMatch && !!lastMatch.id && lastMatch.id !== prev?.lastMatchId;
+  const isNewMatch = !!prev && !!lastMatch && !!lastMatch.id && lastMatch.id !== prev.lastMatchId;
   const tierUp = prev ? data.tierNumber > prev.tierNumber : false;
   const tierDown = prev ? data.tierNumber < prev.tierNumber : false;
 
