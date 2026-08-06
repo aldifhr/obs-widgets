@@ -45,7 +45,7 @@ async function callOpenAiCompatible(input: GiftEvent, opts: LlmOptions): Promise
     body: JSON.stringify({
       model: opts.model,
       temperature: 0.9,
-      max_tokens: Math.min(256, opts.maxLength + 80),
+      max_tokens: Math.max(512, opts.maxLength + 80),
       messages: [
         {
           role: 'system',
@@ -69,7 +69,19 @@ async function callOpenAiCompatible(input: GiftEvent, opts: LlmOptions): Promise
     throw new Error(`LLM request failed: ${res.status}`);
   }
 
-  const data = await res.json();
+  // Some gateways append an SSE tail ("data: [DONE]") right after the JSON
+  // body, which makes JSON.parse fail. Keep only the first complete JSON
+  // document and ignore everything after its closing brace.
+  const raw = await res.text();
+  let data: any = null;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    const end = raw.lastIndexOf('}');
+    if (end <= 0) throw new Error('LLM returned an unparseable response');
+    data = JSON.parse(raw.slice(0, end + 1));
+  }
+
   const text = data?.choices?.[0]?.message?.content;
   if (typeof text !== 'string' || !text.trim()) {
     throw new Error('LLM returned empty text');

@@ -1,0 +1,10 @@
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import '../index.css';
+import AlertDemo from './AlertDemo';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <AlertDemo kind="share" />
+  </React.StrictMode>
+);

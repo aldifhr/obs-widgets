@@ -85,6 +85,34 @@ function parseJsonFrames(rawData: string): unknown[] {
   return frames;
 }
 
+export interface EulerMessage {
+  type?: string;
+  data?: unknown;
+}
+
+/**
+ * Extracts every typed message ({type, data}) from a raw WebSocket payload,
+ * handling bundles, arrays, and multiple concatenated JSON documents.
+ */
+export function parseEulerMessages(rawData: string): EulerMessage[] {
+  const out: EulerMessage[] = [];
+  for (const parsed of parseJsonFrames(rawData)) {
+    if (typeof parsed !== 'object' || parsed === null) continue;
+    const bundle = parsed as {
+      type?: string;
+      data?: unknown;
+      messages?: Array<{ type?: string; data?: unknown }>;
+    };
+    const messages: Array<{ type?: string; data?: unknown }> = Array.isArray(bundle)
+      ? (bundle as Array<{ type?: string; data?: unknown }>)
+      : bundle.messages ?? (bundle.type ? [bundle] : []);
+    for (const msg of messages) {
+      if (msg && typeof msg === 'object' && msg.type) out.push(msg);
+    }
+  }
+  return out;
+}
+
 /**
  * Returns a final GiftEvent for each finished gift. Combo streaks fire
  * multiple messages (repeatEnd=0) then one final (repeatEnd=1) — we only
@@ -92,38 +120,26 @@ function parseJsonFrames(rawData: string): unknown[] {
  */
 export function parseGiftEvents(rawData: string): GiftEvent[] {
   const gifts: GiftEvent[] = [];
-  for (const parsed of parseJsonFrames(rawData)) {
-    if (typeof parsed !== 'object' || parsed === null) continue;
-
-    const bundle = parsed as {
-      type?: string;
-      data?: unknown;
-      messages?: Array<{ type?: string; data?: unknown }>;
-    };
-
-    const messages: Array<{ type?: string; data?: unknown }> = Array.isArray(bundle)
-      ? (bundle as Array<{ type?: string; data?: unknown }>)
-      : bundle.messages ?? (bundle.type ? [bundle] : []);
-
-    for (const msg of messages) {
-      if (msg.type !== 'WebcastGiftMessage' || !msg.data) continue;
-      const g = msg.data as GiftMessageData;
-      const isFinal = (g.repeatEnd ?? 1) === 1;
-      if (!isFinal) continue;
-      gifts.push(toGiftEvent(g));
-    }
+  for (const msg of parseEulerMessages(rawData)) {
+    if (msg.type !== 'WebcastGiftMessage' || !msg.data) continue;
+    const g = msg.data as GiftMessageData;
+    const isFinal = (g.repeatEnd ?? 1) === 1;
+    if (!isFinal) continue;
+    gifts.push(toGiftEvent(g));
   }
   return gifts;
 }
 
-export function connectEuler(
+export interface EulerHandlers {
+  onMessages: (messages: EulerMessage[]) => void;
+  onOpen?: () => void;
+  onClose?: (code: number, reason: string) => void;
+}
+
+export function openEulerConnection(
   tiktokUser: string,
   apiKey: string,
-  handlers: {
-    onGift: (gift: GiftEvent) => void;
-    onOpen?: () => void;
-    onClose?: (code: number, reason: string) => void;
-  },
+  handlers: EulerHandlers,
 ): EulerConnection {
   const ws = new WebSocket(buildEulerWsUrl(tiktokUser, apiKey));
 
@@ -131,8 +147,8 @@ export function connectEuler(
     try {
       const data = typeof ev.data === 'string' ? ev.data : '';
       if (!data) return;
-      const gifts = parseGiftEvents(data);
-      gifts.forEach(handlers.onGift);
+      const messages = parseEulerMessages(data);
+      if (messages.length) handlers.onMessages(messages);
     } catch {
       // never let a malformed frame break the connection
     }
@@ -159,6 +175,29 @@ export function connectEuler(
       }
     },
   };
+}
+
+export function connectEuler(
+  tiktokUser: string,
+  apiKey: string,
+  handlers: {
+    onGift: (gift: GiftEvent) => void;
+    onOpen?: () => void;
+    onClose?: (code: number, reason: string) => void;
+  },
+): EulerConnection {
+  return openEulerConnection(tiktokUser, apiKey, {
+    onMessages: (messages) => {
+      for (const msg of messages) {
+        if (msg.type !== 'WebcastGiftMessage' || !msg.data) continue;
+        const g = msg.data as GiftMessageData;
+        if ((g.repeatEnd ?? 1) !== 1) continue;
+        handlers.onGift(toGiftEvent(g));
+      }
+    },
+    onOpen: handlers.onOpen,
+    onClose: handlers.onClose,
+  });
 }
 
 const CLOSE_REASONS: Partial<Record<ClientCloseCode, string>> = {
