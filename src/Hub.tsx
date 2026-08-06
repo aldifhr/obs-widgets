@@ -2,7 +2,7 @@ export default function Hub() {
   return (
     <div className="mx-auto max-w-[960px] px-6 py-10 pb-16">
       <header className="mb-9 border-b border-[#1f232b] pb-[22px] pt-[18px]">
-        <div className="text-[1.35em] font-black tracking-tight text-[#e5e7eb]">obs.aldifhr.fun</div>
+        <div className="text-[1.35em] font-black tracking-tight text-[#e5e7eb]">widgets.aldifhr.fun</div>
         <div className="mt-1 text-[0.78em] font-semibold uppercase tracking-[0.4px] text-[#9ca3af]">
           Valorant &amp; OBS Widgets
         </div>
@@ -16,6 +16,26 @@ export default function Hub() {
           <h3 className="mb-1.5 text-[1.05em] font-extrabold">Valorant Rank</h3>
           <p className="m-0 text-[0.85em] leading-[1.4] text-[#9ca3af]">
             Configure colors, size, background &amp; live preview, then copy the widget URL into OBS.
+          </p>
+        </a>
+
+        <a
+          href="/customizer/shoutout"
+          className="block rounded-2xl border border-[#1f232b] bg-[#0f1115] p-[18px] text-white transition-all duration-150 hover:-translate-y-0.5 hover:border-white/15 hover:bg-[#14171c]"
+        >
+          <h3 className="mb-1.5 text-[1.05em] font-extrabold">AI Shoutout</h3>
+          <p className="m-0 text-[0.85em] leading-[1.4] text-[#9ca3af]">
+            TikTok gift detection (Euler Stream) + LLM thank-you messages for your livestream.
+          </p>
+        </a>
+
+        <a
+          href="/demo/shoutout"
+          className="block rounded-2xl border border-[#1f232b] bg-[#0f1115] p-[18px] text-white transition-all duration-150 hover:-translate-y-0.5 hover:border-white/15 hover:bg-[#14171c]"
+        >
+          <h3 className="mb-1.5 text-[1.05em] font-extrabold">AI Shoutout Demo</h3>
+          <p className="m-0 text-[0.85em] leading-[1.4] text-[#9ca3af]">
+            Live demo — simulated TikTok gifts with real AI-generated thank-you lines.
           </p>
         </a>
       </main>

@@ -274,4 +274,172 @@
       opacity: 0;
     }
   }
+
+  /* ---------- AI shoutout overlay ---------- */
+  .shoutout-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    overflow: hidden;
+    background: transparent;
+    pointer-events: none;
+    font-family: var(--font-family, 'Inter', system-ui, sans-serif);
+  }
+
+  .shoutout-anim {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    padding: 28px 32px;
+    pointer-events: none;
+  }
+
+  .shoutout-toast {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 560px;
+    padding: 16px 22px;
+    border-radius: 18px;
+    overflow: hidden;
+    color: #fff;
+    background: linear-gradient(160deg, rgba(17, 20, 26, 0.94), rgba(11, 13, 17, 0.94));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+    font-size: calc(1em * var(--font-scale, 1));
+    animation: shoutoutPop 6.5s ease forwards;
+  }
+
+  .shoutout-toast::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(220px 120px at 15% -20%, var(--accent-glow, rgba(254, 44, 85, 0.4)), transparent 70%);
+    pointer-events: none;
+  }
+
+  .shoutout-ribbon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 1;
+  }
+
+  .shoutout-avatar {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--accent, #fe2c55);
+    box-shadow: 0 0 22px var(--accent-glow, rgba(254, 44, 85, 0.45));
+  }
+
+  .shoutout-body {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+  }
+
+  .shoutout-nick {
+    font-size: 1.35em;
+    font-weight: 900;
+    letter-spacing: 0.01em;
+    color: var(--accent-light, #ff7ea6);
+    text-shadow: 0 0 24px var(--accent-glow, rgba(254, 44, 85, 0.5));
+    line-height: 1.1;
+  }
+
+  .shoutout-gift {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 5px;
+    font-size: 0.92em;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .shoutout-gift-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+  }
+
+  .shoutout-diamonds {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    padding: 1px 9px;
+    border-radius: 99px;
+    font-size: 0.82em;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(90deg, var(--accent, #fe2c55), var(--accent-light, #ff7ea6));
+  }
+
+  .shoutout-gem {
+    font-size: 0.7em;
+  }
+
+  .shoutout-line {
+    margin-top: 8px;
+    font-size: 0.9em;
+    font-style: italic;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.78);
+    line-height: 1.45;
+  }
+
+  .shoutout-status {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(15, 17, 21, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .shoutout-status-error {
+    color: #fca5a5;
+    border-color: rgba(248, 113, 113, 0.4);
+  }
+
+  .shoutout-preview .shoutout-toast {
+    animation: none;
+    opacity: 1;
+  }
+
+  .shoutout-preview .shoutout-anim {
+    padding: 24px;
+  }
+
+  @keyframes shoutoutPop {
+    0% {
+      transform: translateY(40px) scale(0.94);
+      opacity: 0;
+    }
+    6% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    82% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(12px) scale(0.98);
+      opacity: 0;
+    }
+  }
 }
