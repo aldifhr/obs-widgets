@@ -51,36 +51,67 @@ function toGiftEvent(raw: GiftMessageData): GiftEvent {
 }
 
 /**
+ * Some WebSocket transports deliver several JSON documents concatenated in a
+ * single message (JSON Lines, back-to-back objects, or with binary separators
+ * between them). JSON.parse only accepts one document, so scan forward to the
+ * next JSON value start ({ or [) and recover each document boundary from the
+ * reported error position ("Unexpected ... after JSON at position N").
+ */
+function parseJsonFrames(rawData: string): unknown[] {
+  const frames: unknown[] = [];
+  let input = rawData;
+  while (true) {
+    const start = input.search(/[{[]/);
+    if (start === -1) break;
+    const candidate = input.slice(start).trim();
+    if (!candidate) break;
+    try {
+      frames.push(JSON.parse(candidate));
+      break;
+    } catch (e) {
+      const m = e instanceof Error ? /position (\d+)/.exec(e.message) : null;
+      if (!m) break;
+      const cut = Number(m[1]);
+      if (cut <= 0) break;
+      const head = candidate.slice(0, cut);
+      try {
+        frames.push(JSON.parse(head));
+      } catch {
+        break;
+      }
+      input = candidate.slice(cut);
+    }
+  }
+  return frames;
+}
+
+/**
  * Returns a final GiftEvent for each finished gift. Combo streaks fire
  * multiple messages (repeatEnd=0) then one final (repeatEnd=1) — we only
  * emit the final one so the overlay is not spammed per combo tick.
  */
 export function parseGiftEvents(rawData: string): GiftEvent[] {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(rawData);
-  } catch {
-    return [];
-  }
-  if (typeof parsed !== 'object' || parsed === null) return [];
-
-  const bundle = parsed as {
-    type?: string;
-    data?: unknown;
-    messages?: Array<{ type?: string; data?: unknown }>;
-  };
-
-  const messages: Array<{ type?: string; data?: unknown }> = Array.isArray(bundle)
-    ? (bundle as Array<{ type?: string; data?: unknown }>)
-    : bundle.messages ?? (bundle.type ? [bundle] : []);
-
   const gifts: GiftEvent[] = [];
-  for (const msg of messages) {
-    if (msg.type !== 'WebcastGiftMessage' || !msg.data) continue;
-    const g = msg.data as GiftMessageData;
-    const isFinal = (g.repeatEnd ?? 1) === 1;
-    if (!isFinal) continue;
-    gifts.push(toGiftEvent(g));
+  for (const parsed of parseJsonFrames(rawData)) {
+    if (typeof parsed !== 'object' || parsed === null) continue;
+
+    const bundle = parsed as {
+      type?: string;
+      data?: unknown;
+      messages?: Array<{ type?: string; data?: unknown }>;
+    };
+
+    const messages: Array<{ type?: string; data?: unknown }> = Array.isArray(bundle)
+      ? (bundle as Array<{ type?: string; data?: unknown }>)
+      : bundle.messages ?? (bundle.type ? [bundle] : []);
+
+    for (const msg of messages) {
+      if (msg.type !== 'WebcastGiftMessage' || !msg.data) continue;
+      const g = msg.data as GiftMessageData;
+      const isFinal = (g.repeatEnd ?? 1) === 1;
+      if (!isFinal) continue;
+      gifts.push(toGiftEvent(g));
+    }
   }
   return gifts;
 }
@@ -97,10 +128,14 @@ export function connectEuler(
   const ws = new WebSocket(buildEulerWsUrl(tiktokUser, apiKey));
 
   ws.onmessage = (ev) => {
-    const data = typeof ev.data === 'string' ? ev.data : '';
-    if (!data) return;
-    const gifts = parseGiftEvents(data);
-    gifts.forEach(handlers.onGift);
+    try {
+      const data = typeof ev.data === 'string' ? ev.data : '';
+      if (!data) return;
+      const gifts = parseGiftEvents(data);
+      gifts.forEach(handlers.onGift);
+    } catch {
+      // never let a malformed frame break the connection
+    }
   };
 
   ws.onopen = () => handlers.onOpen?.();
