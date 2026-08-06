@@ -10,7 +10,7 @@ export default function Hub() {
 
       <main className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3.5">
         <a
-          href="/customizer/valorant.html"
+          href="/customizer/valorant"
           className="block rounded-2xl border border-[#1f232b] bg-[#0f1115] p-[18px] text-white transition-all duration-150 hover:-translate-y-0.5 hover:border-white/15 hover:bg-[#14171c]"
         >
           <h3 className="mb-1.5 text-[1.05em] font-extrabold">Valorant Rank</h3>
