@@ -56,6 +56,7 @@ export interface WidgetConfig {
   preset: string;
   design: string;
   sound: boolean;
+  henrikKey: string;
 }
 
 export const DEFAULT_CONFIG: WidgetConfig = {
@@ -85,4 +86,5 @@ export const DEFAULT_CONFIG: WidgetConfig = {
   preset: 'default',
   design: 'classic',
   sound: true,
+  henrikKey: '',
 };

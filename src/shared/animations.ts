@@ -6,16 +6,6 @@ export interface WidgetState {
   lastMatchId: string | null;
 }
 
-const EVENT_LABELS: Record<WidgetEvent, string> = {
-  rankup: 'RANK UP',
-  derank: 'DERANK',
-  up: 'RR UP',
-  down: 'RR DOWN',
-  win: 'WIN',
-  lose: 'LOSS',
-  tie: 'TIED',
-};
-
 export function getStateKey(name: string, tag: string, region: string): string {
   return `valorant-rank-widget:state:${region}:${name.toLowerCase()}#${tag.toLowerCase()}`;
 }
@@ -60,34 +50,6 @@ export function detectEvents(
   }
 
   return [];
-}
-
-export function playEventAnimation(container: HTMLElement, event: WidgetEvent, detail = '') {
-  removeEventOverlay();
-  const overlay = document.createElement('div');
-  overlay.className = `event-overlay event-${event}`;
-  const detailHtml = detail ? `<div class="event-detail">${detail}</div>` : '';
-  overlay.innerHTML = `<div class="event-body"><div class="event-title">${EVENT_LABELS[event]}</div>${detailHtml}</div>`;
-
-  const isWidgetPage = document.body.classList.contains('widget-page');
-  if (isWidgetPage) {
-    document.body.appendChild(overlay);
-  } else {
-    overlay.classList.add('event-box');
-    container.appendChild(overlay);
-  }
-
-  setTimeout(() => overlay.remove(), 3500);
-}
-
-export function removeEventOverlay() {
-  document.querySelectorAll('.event-overlay').forEach((el) => el.remove());
-}
-
-export function playEvents(container: HTMLElement, events: WidgetEvent[]) {
-  events.forEach((event, i) => {
-    setTimeout(() => playEventAnimation(container, event), i * 500);
-  });
 }
 
 let audioCtx: AudioContext | null = null;

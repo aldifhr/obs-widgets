@@ -11,20 +11,22 @@ export interface LastMatchResult {
   result: 'win' | 'lose' | 'tie';
 }
 
-function authHeaders(): Record<string, string> {
-  return HENRIK_KEY ? { Authorization: HENRIK_KEY } : {};
+function authHeaders(apiKey?: string): Record<string, string> {
+  const key = apiKey || HENRIK_KEY;
+  return key ? { Authorization: key } : {};
 }
 
 export async function fetchLastMatch(
   name: string,
   tag: string,
   region: string,
+  apiKey?: string,
 ): Promise<LastMatchResult | null> {
   const encodedName = encodeURIComponent(name.trim());
   const encodedTag = encodeURIComponent(tag.trim().replace('#', ''));
   const url = `${HENRIK_MATCHES}/${encodeURIComponent(region)}/${encodedName}/${encodedTag}?mode=competitive`;
 
-  const res = await fetch(url, { headers: authHeaders() });
+  const res = await fetch(url, { headers: authHeaders(apiKey) });
   if (!res.ok) {
     if (res.status === 404) return null;
     const text = await res.text().catch(() => '');
@@ -57,12 +59,13 @@ export async function fetchMmr(
   name: string,
   tag: string,
   region: string,
+  apiKey?: string,
 ): Promise<RankDisplay> {
   const encodedName = encodeURIComponent(name.trim());
   const encodedTag = encodeURIComponent(tag.trim().replace('#', ''));
   const url = `${HENRIK_BASE}/${encodeURIComponent(region)}/${encodedName}/${encodedTag}`;
 
-  const res = await fetch(url, { headers: authHeaders() });
+  const res = await fetch(url, { headers: authHeaders(apiKey) });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`Henrik API error ${res.status}${text ? ': ' + text : ''}`);

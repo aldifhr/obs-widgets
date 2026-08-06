@@ -28,6 +28,7 @@ export function configToParams(config: WidgetConfig): URLSearchParams {
   if (config.preset !== 'default') params.set('preset', config.preset);
   if (config.design !== 'classic') params.set('design', config.design);
   if (!config.sound) params.set('sound', '0');
+  if (config.henrikKey) params.set('henrikKey', config.henrikKey);
   return params;
 }
 
@@ -59,5 +60,6 @@ export function paramsToConfig(params: URLSearchParams): WidgetConfig {
     preset: params.get('preset') ?? DEFAULT_CONFIG.preset,
     design: params.get('design') ?? DEFAULT_CONFIG.design,
     sound: params.get('sound') !== '0',
+    henrikKey: params.get('henrikKey') ?? DEFAULT_CONFIG.henrikKey,
   };
 }
