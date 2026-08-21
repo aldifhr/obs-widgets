@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { PLATFORMS, PLATFORM_KEYS, SHAPE_MAP, toHex7, SectionTitle } from '../lib/platforms'
-import type { Platform, Shape } from '../lib/platforms'
+import { PLATFORMS, PLATFORM_KEYS, toHex7, SectionTitle } from '../lib/platforms'
+import type { Platform } from '../lib/platforms'
 
 export function SocialFollowCustomizer() {
   const [searchParams] = useSearchParams()
@@ -16,9 +16,11 @@ export function SocialFollowCustomizer() {
     const v = searchParams.get('bg')
     return v && /^#[0-9a-fA-F]{6}$/.test(v) ? v : '#000000'
   })
-  const [size, setSize] = useState(Number(searchParams.get('size')) || 64)
+  const [iconSize, setIconSize] = useState(Number(searchParams.get('iconSize')) || 48)
+  const [padding, setPadding] = useState(Number(searchParams.get('padding')) || 16)
+  const [radius, setRadius] = useState(Number(searchParams.get('radius')) || 999)
+  const [border, setBorder] = useState(searchParams.get('border') !== '0')
   const [anim, setAnim] = useState(searchParams.get('anim') || 'pulse')
-  const [shape, setShape] = useState<Shape>((searchParams.get('shape') as Shape) || 'pill')
   const [copied, setCopied] = useState(false)
   const [iconPhase, setIconPhase] = useState<'visible' | 'exiting' | 'entering'>('visible')
   const prevPlatform = useRef(platform)
@@ -29,7 +31,11 @@ export function SocialFollowCustomizer() {
   useEffect(() => {
     if (prevPlatform.current !== platform) {
       setIconPhase('exiting')
-      const t = setTimeout(() => { setIconPhase('entering'); const t2 = setTimeout(() => setIconPhase('visible'), 200); return () => clearTimeout(t2) }, 200)
+      const t = setTimeout(() => {
+        setIconPhase('entering')
+        const t2 = setTimeout(() => setIconPhase('visible'), 200)
+        return () => clearTimeout(t2)
+      }, 200)
       prevPlatform.current = platform
       return () => clearTimeout(t)
     }
@@ -42,7 +48,7 @@ export function SocialFollowCustomizer() {
   }
 
   const widgetParams = new URLSearchParams({
-    platform, handle, color, textColor, bg: bgColor, size: String(size), anim, shape, hide: '1',
+    platform, handle, color, textColor, bg: bgColor, iconSize: String(iconSize), padding: String(padding), radius: String(radius), border: border ? '1' : '0', anim, hide: '1',
   })
   const widgetUrl = `${window.location.origin}/social-follow?${widgetParams.toString()}`
   const copyUrl = () => { navigator.clipboard.writeText(widgetUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
@@ -59,9 +65,9 @@ export function SocialFollowCustomizer() {
   const animClass = anim === 'pulse' ? 'animate-[pulse_2s_ease-in-out_infinite]' : anim === 'bounce' ? 'animate-[bounce_1.5s_ease-in-out_infinite]' : anim === 'fade' ? 'animate-[fade_3s_ease-in-out_infinite]' : anim === 'slide' ? 'animate-[slide_2s_ease-in-out_infinite]' : ''
 
   const WidgetPill = ({ className = '' }: { className?: string }) => (
-    <div className={`flex items-center border backdrop-blur-xl shadow-2xl ${SHAPE_MAP[shape]} ${animClass} ${className}`} style={{ gap: size * 0.3, padding: `${size * 0.3}px ${size * 0.5}px`, background: bgColor, boxShadow: `0 0 ${size * 0.6}px ${bgColor}60, 0 8px 32px rgba(0,0,0,0.5)` }}>
-      <div style={{ color, flexShrink: 0, ...iconStyle }} className="drop-shadow-lg">{renderIcon(p.icon, size)}</div>
-      <span className="text-white font-bold whitespace-nowrap drop-shadow" style={{ fontSize: size * 0.32, color: textColor }}>{handle}</span>
+    <div className={`flex items-center border backdrop-blur-xl shadow-2xl rounded-[${radius}px] ${animClass} ${className}`} style={{ gap: iconSize * 0.3, padding: `${padding}px ${padding * 1.5}px`, background: bgColor, boxShadow: `0 0 ${iconSize * 0.6}px ${bgColor}60, 0 8px 32px rgba(0,0,0,0.5)`, borderWidth: border ? '1px' : '0' }}>
+      <div style={{ color, flexShrink: 0, ...iconStyle }} className="drop-shadow-lg">{renderIcon(p.icon, iconSize)}</div>
+      <span className="text-white font-bold whitespace-nowrap drop-shadow" style={{ fontSize: iconSize * 0.4, color: textColor }}>{handle}</span>
     </div>
   )
 
@@ -106,19 +112,26 @@ export function SocialFollowCustomizer() {
               <input value={handle} onChange={e => setHandle(e.target.value)} className="w-full bg-studio-800/50 border border-studio-border rounded-xl px-3 py-2.5 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-white/20 transition-colors" placeholder="@username" />
             </section>
             <section>
-              <SectionTitle>Icon Size <span className="text-zinc-600 font-mono font-normal ml-1">{size}px</span></SectionTitle>
-              <input type="range" min="24" max="128" value={size} onChange={e => setSize(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: color }} />
+              <SectionTitle>Icon Size <span className="text-zinc-600 font-mono font-normal ml-1">{iconSize}px</span></SectionTitle>
+              <input type="range" min="24" max="128" value={iconSize} onChange={e => setIconSize(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: color }} />
               <div className="flex justify-between text-[10px] text-zinc-700 mt-1 font-mono"><span>24</span><span>128</span></div>
             </section>
             <section>
-              <SectionTitle>Shape</SectionTitle>
-              <div className="grid grid-cols-3 gap-2">
-                {(['pill', 'rounded', 'square'] as const).map(s => (
-                  <button key={s} onClick={() => setShape(s)} className={`flex items-center justify-center gap-2 py-2.5 text-xs font-medium capitalize transition-all border ${shape === s ? 'bg-white/10 text-white border-white/15' : 'bg-studio-800/50 text-zinc-500 border-studio-border hover:text-zinc-300'}`}>
-                    <div className={`w-4 h-3 border border-current ${SHAPE_MAP[s]}`} />
-                    {s}
-                  </button>
-                ))}
+              <SectionTitle>Padding <span className="text-zinc-600 font-mono font-normal ml-1">{padding}px</span></SectionTitle>
+              <input type="range" min="4" max="40" value={padding} onChange={e => setPadding(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: color }} />
+              <div className="flex justify-between text-[10px] text-zinc-700 mt-1 font-mono"><span>4</span><span>40</span></div>
+            </section>
+            <section>
+              <SectionTitle>Corner Radius <span className="text-zinc-600 font-mono font-normal ml-1">{radius >= 999 ? 'Pill' : `${radius}px`}</span></SectionTitle>
+              <input type="range" min="0" max="999" value={radius} onChange={e => setRadius(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: color }} />
+              <div className="flex justify-between text-[10px] text-zinc-700 mt-1 font-mono"><span>0</span><span>Pill</span></div>
+            </section>
+            <section>
+              <div className="flex items-center justify-between">
+                <SectionTitle>Border</SectionTitle>
+                <button onClick={() => setBorder(!border)} className={`w-10 h-5 rounded-full transition-colors ${border ? 'bg-signal' : 'bg-zinc-700'}`}>
+                  <div className={`w-4 h-4 rounded-full bg-white transition-transform ${border ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </button>
               </div>
             </section>
             <section>

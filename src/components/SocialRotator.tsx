@@ -68,7 +68,7 @@ export function SocialRotatorCustomizer() {
   const widgetParams = new URLSearchParams({
     platforms: activePlatforms.join(','),
     handles: activePlatforms.map(k => handles[k]).join(','),
-    interval: String(interval), transition, transDuration: String(transitionDuration), textColor: bgColor === '#000000' ? textColor : textColor,
+    interval: String(interval), transition, transDuration: String(transitionDuration), textColor,
     bg: bgColor, size: String(size), anim, shape, hide: '1',
   })
   const widgetUrl = `${window.location.origin}/social-rotator?${widgetParams.toString()}`
