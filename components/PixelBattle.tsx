@@ -141,41 +141,64 @@ export function PixelBattle() {
 
   const names = ['pandafaa', 'Budi', 'Sari', 'Raka', 'Dina', 'Andi', 'Maya', 'Reza', 'Luna', 'Fajar', 'Nisa', 'Joko']
 
-  const PixelChar = ({ f }: { f: Fighter }) => (
-    <div
-      className="absolute select-none"
-      style={{
-        left: f.x,
-        top: f.y,
-        width: SIZE,
-        height: SIZE,
-        transform: `scaleX(${f.facing})`,
-        imageRendering: 'pixelated',
-        transition: 'filter 0.1s',
-        filter: f.attacking ? 'brightness(1.6)' : 'none',
-      }}
-    >
-      {/* head */}
-      <div className="absolute" style={{ left: 6, top: 0, width: 8, height: 8, background: f.color, boxShadow: `inset -2px -2px 0 rgba(0,0,0,0.2)` }} />
-      <div className="absolute" style={{ left: 7, top: 2, width: 2, height: 2, background: '#000' }} />
-      <div className="absolute" style={{ left: 11, top: 2, width: 2, height: 2, background: '#000' }} />
-      {/* body */}
-      <div className="absolute" style={{ left: 4, top: 8, width: 12, height: 8, background: f.color, opacity: 0.9 }} />
-      {/* arms */}
-      <div className="absolute" style={{ left: 1, top: 9, width: 3, height: 6, background: f.color }} />
-      <div className="absolute" style={{ left: 16, top: 9, width: 3, height: 6, background: f.color }} />
-      {/* legs */}
-      <div className="absolute" style={{ left: 5, top: 16, width: 4, height: 4, background: '#333' }} />
-      <div className="absolute" style={{ left: 11, top: 16, width: 4, height: 4, background: '#333' }} />
-      {/* hit effect */}
-      {f.attacking && <div className="absolute" style={{ left: 18, top: 4, width: 4, height: 4, background: '#fff', boxShadow: '0 0 4px #fff' }} />}
-    </div>
-  )
+  const PixelChar = ({ f }: { f: Fighter }) => {
+    const moving = Math.abs(f.vx) + Math.abs(f.vy) > 0.3
+    const speed = moving ? 0.18 : 0
+    return (
+      <div
+        className="absolute select-none"
+        style={{
+          left: f.x,
+          top: f.y,
+          width: SIZE,
+          height: SIZE,
+          imageRendering: 'pixelated',
+          filter: f.attacking ? 'brightness(1.5) drop-shadow(0 0 4px #fff)' : 'none',
+        }}
+      >
+        {/* shadow */}
+        <div className="absolute" style={{ left: 4, top: 20, width: 12, height: 3, background: 'rgba(0,0,0,0.35)', borderRadius: '50%', transform: moving ? 'scaleX(0.85)' : 'scaleX(1)', transition: 'transform 0.15s' }} />
+        <div
+          className="absolute"
+          style={{
+            inset: 0,
+            // @ts-ignore css var
+            ['--sx' as any]: f.facing,
+            transform: f.attacking ? `scaleX(${f.facing}) translateX(3px)` : `scaleX(${f.facing})`,
+            transition: f.attacking ? 'transform 0.08s' : 'transform 0.15s',
+            animation: moving && !f.attacking ? `pixel-bob 0.28s ease-in-out infinite` : undefined,
+          } as any}
+        >
+          {/* head - with outline */}
+          <div className="absolute" style={{ left: 5, top: -1, width: 10, height: 10, background: '#1a1a1a', borderRadius: 1 }} />
+          <div className="absolute" style={{ left: 6, top: 0, width: 8, height: 8, background: f.color, boxShadow: `inset -2px -2px 0 rgba(0,0,0,0.25), inset 1px 1px 0 rgba(255,255,255,0.25)` }} />
+          <div className="absolute" style={{ left: 7, top: 2, width: 2, height: 3, background: '#fff', borderRadius: 1 }} />
+          <div className="absolute" style={{ left: 7, top: 2.5, width: 1.5, height: 2, background: '#000', borderRadius: 1 }} />
+          <div className="absolute" style={{ left: 11, top: 2, width: 2, height: 3, background: '#fff', borderRadius: 1 }} />
+          <div className="absolute" style={{ left: 11.5, top: 2.5, width: 1.5, height: 2, background: '#000', borderRadius: 1 }} />
+          {/* body */}
+          <div className="absolute" style={{ left: 4, top: 8, width: 12, height: 9, background: f.color, boxShadow: `inset 0 -2px 0 rgba(0,0,0,0.2)`, border: '1px solid rgba(0,0,0,0.3)' }} />
+          <div className="absolute" style={{ left: 7, top: 9, width: 6, height: 2, background: 'rgba(255,255,255,0.3)', borderRadius: 1 }} />
+          {/* arms - swing when moving */}
+          <div className="absolute" style={{ left: 1, top: 9, width: 3, height: 6, background: f.color, border: '1px solid rgba(0,0,0,0.3)', transformOrigin: 'top center', animation: moving && !f.attacking ? `pixel-arm 0.28s ease-in-out infinite` : undefined }} />
+          <div className="absolute" style={{ left: 16, top: 9, width: 3, height: 6, background: f.color, border: '1px solid rgba(0,0,0,0.3)', transformOrigin: 'top center', animation: moving && !f.attacking ? `pixel-arm 0.28s ease-in-out infinite reverse` : undefined }} />
+          {/* legs - walk cycle */}
+          <div className="absolute" style={{ left: 5, top: 16, width: 4, height: 5, background: '#2a2a2e', border: '1px solid #000', transformOrigin: 'top center', animation: moving && !f.attacking ? `pixel-leg 0.28s ease-in-out infinite` : undefined }} />
+          <div className="absolute" style={{ left: 11, top: 16, width: 4, height: 5, background: '#2a2a2e', border: '1px solid #000', transformOrigin: 'top center', animation: moving && !f.attacking ? `pixel-leg 0.28s ease-in-out infinite reverse` : undefined }} />
+          {/* sword when attacking */}
+          {f.attacking && <div className="absolute" style={{ left: 18, top: 7, width: 6, height: 2, background: '#e5e7eb', border: '1px solid #000', boxShadow: '1px 0 0 #fff' }} />}
+          {f.attacking && <div className="absolute" style={{ left: 20, top: 5, width: 2, height: 2, background: '#fff', boxShadow: '0 0 6px #fff, 0 0 10px #ffd700' }} />}
+        </div>
+      </div>
+    )
+  }
 
   const Arena = () => (
-    <div className="relative overflow-hidden" style={{ width: ARENA_W, height: ARENA_H, background: '#1a1a1e', border: '2px solid #2a2a2e', imageRendering: 'pixelated' }}>
-      {/* grid */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+    <div className="relative overflow-hidden" style={{ width: ARENA_W, height: ARENA_H, background: 'linear-gradient(180deg, #1e1e24 0%, #1a1a1e 100%)', border: '2px solid #2a2a2e', imageRendering: 'pixelated' }}>
+      <style>{`@keyframes pixel-bob { 0%,100% { transform: scaleX(var(--sx)) translateY(0) } 50% { transform: scaleX(var(--sx)) translateY(-1.5px) } } @keyframes pixel-arm { 0%,100% { transform: rotate(-14deg) } 50% { transform: rotate(14deg) } } @keyframes pixel-leg { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-1px) } }`}</style>
+      {/* grid + vignette */}
+      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%)' }} />
       {fighters.map(f => (
         <div key={f.id} className="absolute" style={{ left: f.x, top: f.y - 14, width: SIZE + 40, marginLeft: -20, textAlign: 'center', pointerEvents: 'none' }}>
           <div className="inline-flex flex-col items-center gap-0.5">
