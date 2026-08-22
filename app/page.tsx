@@ -17,6 +17,11 @@ export const listOverlay = [
     name: 'Starting Soon',
     description: 'Animasi text fullscreen + countdown',
     href: '/starting',
+  },
+  {
+    name: 'Text Overlay',
+    description: 'Text bebas custom font, color, animasi',
+    href: '/text',
   }
 ]
 export default function HomePage() {
