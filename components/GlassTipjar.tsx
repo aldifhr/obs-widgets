@@ -170,7 +170,6 @@ export function GlassJar() {
     return v > 0 ? v : 500000
   })
   const [liquidColor, setLiquidColor] = useState(searchParams.get('liquid') || '#FFC53D')
-  const [bgColor, setBgColor] = useState(searchParams.get('bg') || 'transparent')
   const [scale, setScale] = useState(() => {
     const v = Number(searchParams.get('scale'))
     return v > 0 ? v : 1
@@ -329,7 +328,7 @@ export function GlassJar() {
   }, [goal])
 
   const widgetParams = new URLSearchParams({
-    server, goal: String(goal), liquid: liquidColor, bg: bgColor,
+    server, goal: String(goal), liquid: liquidColor,
     scale: String(scale), toast: String(toastDur), hide: '1',
   })
   const [widgetUrl, setWidgetUrl] = useState('')
@@ -471,7 +470,7 @@ export function GlassJar() {
 
   if (showWidget) {
     return (
-      <div className="flex items-center justify-center p-6" style={{ background: bgColor === 'transparent' ? undefined : bgColor, minHeight: '100vh' }}>
+      <div className="flex items-center justify-center p-6" style={{ minHeight: '100vh' }}>
         <div className="rounded-2xl p-6 relative" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', border: `1px solid ${liquidColor}20` }}>
           <Widget standalone />
         </div>
@@ -536,15 +535,9 @@ export function GlassJar() {
 
             <section>
               <SectionTitle>Colors</SectionTitle>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-zinc-500 text-[11px] block mb-1.5">Liquid</label>
-                  <div className="relative"><div className="absolute inset-0 rounded-xl border border-studio-border" style={{ background: liquidColor }} /><input type="color" value={liquidColor} onChange={e => setLiquidColor(e.target.value)} className="relative w-full h-10 rounded-xl cursor-pointer bg-transparent border-0" /></div>
-                </div>
-                <div>
-                  <label className="text-zinc-500 text-[11px] block mb-1.5">Background</label>
-                  <div className="relative"><div className="absolute inset-0 rounded-xl border border-studio-border" style={{ background: bgColor }} /><input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} className="relative w-full h-10 rounded-xl cursor-pointer bg-transparent border-0" /></div>
-                </div>
+              <div>
+                <label className="text-zinc-500 text-[11px] block mb-1.5">Liquid</label>
+                <div className="relative"><div className="absolute inset-0 rounded-xl border border-studio-border" style={{ background: liquidColor }} /><input type="color" value={liquidColor} onChange={e => setLiquidColor(e.target.value)} className="relative w-full h-10 rounded-xl cursor-pointer bg-transparent border-0" /></div>
               </div>
             </section>
 
