@@ -69,6 +69,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true })
   }
 
+  if (body.event === 'live.start') {
+    const creator = body.creator as Record<string, unknown> | undefined
+    const live = body.live as Record<string, unknown> | undefined
+    const name = (creator?.nickname as string) || (creator?.unique_id as string) || 'Creator'
+    const url = (live?.live_url as string) || ''
+    console.log(`[live] ${name} started live`)
+    broadcast({ id: String(++nextId), kind: 'live.start', name, url, at: Date.now() })
+    return NextResponse.json({ ok: true })
+  }
+
   if (body.event !== 'payment.success') {
     return NextResponse.json({ ok: true, skipped: true })
   }
