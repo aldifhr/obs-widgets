@@ -57,14 +57,15 @@ function FlyingCoin({ color, id }: { color: string; id: string }) {
   )
 }
 
-function PixelJar({ coins, coinColor, flash, glow }: { coins: number; coinColor: string; flash: boolean; glow: number }) {
+function PixelJar({ coinItems, coinColor, flash, glow }: { coinItems: { source: string }[]; coinColor: string; flash: boolean; glow: number }) {
   const slots = useMemo(() => {
     const s = []
-    for (let i = 0; i < Math.min(coins, MAX_COINS); i++) s.push(coinSlot(i))
+    for (let i = 0; i < Math.min(coinItems.length, MAX_COINS); i++) s.push({ ...coinSlot(i), source: coinItems[i].source })
     return s
-  }, [coins])
+  }, [coinItems])
 
   const glowOpacity = 0.2 + glow * 0.35
+  const tiktokColor = '#FF6B6B'
 
   return (
     <svg viewBox="0 0 96 112" className="w-full h-auto" style={{ imageRendering: 'pixelated' }}>
@@ -99,7 +100,7 @@ function PixelJar({ coins, coinColor, flash, glow }: { coins: number; coinColor:
       {/* coins */}
       <g clipPath="url(#ptj-jar-clip)">
         {slots.map((s, i) => (
-          <PixelCoin key={i} x={s.x} y={s.y} color={coinColor} />
+          <PixelCoin key={i} x={s.x} y={s.y} color={s.source === 'tiktok' ? tiktokColor : coinColor} />
         ))}
       </g>
     </svg>
@@ -201,7 +202,7 @@ export function PixelTipjarCustomizer() {
   const [copied, setCopied] = useState(false)
 
   const [total, setTotal] = useState(0)
-  const [coins, setCoins] = useState(0)
+  const [coinItems, setCoinItems] = useState<{ source: string }[]>([])
   const [toast, setToast] = useState<{ name: string; amount: number; message: string; id: string } | null>(null)
   const [flash, setFlash] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
@@ -232,7 +233,7 @@ export function PixelTipjarCustomizer() {
   const handleEvent = useCallback((e: TakoEvent) => {
     if (e.kind === 'like') {
       setLikeCount(c => c + e.count)
-      setCoins(coins => Math.min(coins + Math.max(1, Math.round(e.count / 2)), MAX_COINS))
+      setCoinItems(coins => [...coins, ...Array.from({ length: Math.max(1, Math.round(e.count / 2)) }, () => ({ source: 'tiktok' }))].slice(-MAX_COINS))
       setFlash(true)
       setTimeout(() => setFlash(false), 400)
       const id = 'heart-' + Date.now() + '-' + Math.random()
@@ -243,7 +244,7 @@ export function PixelTipjarCustomizer() {
     }
     if (e.kind === 'gift') {
       setTotal(t => t + e.diamondCount)
-      setCoins(c => Math.min(c + Math.max(1, Math.round(e.diamondCount / 5)), MAX_COINS))
+      setCoinItems(coins => [...coins, ...Array.from({ length: Math.max(1, Math.round(e.diamondCount / 5)) }, () => ({ source: 'tiktok' }))].slice(-MAX_COINS))
       setFlash(true)
       setTimeout(() => setFlash(false), 600)
 
@@ -259,7 +260,7 @@ export function PixelTipjarCustomizer() {
     }
     if (e.kind !== 'tip') return
     setTotal(t => t + e.amount)
-    setCoins(c => Math.min(c + Math.max(1, Math.round(e.amount / 5000)), MAX_COINS))
+    setCoinItems(coins => [...coins, ...Array.from({ length: Math.max(1, Math.round(e.amount / 5000)) }, () => ({ source: 'tako' }))].slice(-MAX_COINS))
     setFlash(true)
     setTimeout(() => setFlash(false), 600)
 
@@ -355,7 +356,7 @@ export function PixelTipjarCustomizer() {
         <div className="relative">
           {showConfetti && <Confetti color={coinColor} burst={confettiBurst} />}
           <div className="w-48 relative">
-            <PixelJar coins={coins} coinColor={coinColor} flash={flash} glow={pct} />
+            <PixelJar coinItems={coinItems} coinColor={coinColor} flash={flash} glow={pct} />
             {flyingCoin && <FlyingCoin key={flyingCoin.id} id={flyingCoin.id} color={coinColor} />}
             {hearts.map(h => (
               <div
