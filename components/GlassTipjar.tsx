@@ -61,24 +61,6 @@ function CoinDrop({ color, id }: { color: string; id: string }) {
   )
 }
 
-function ProgressBar({ pct, color }: { pct: number; color: string }) {
-  const filled = Math.round(pct * 10)
-  return (
-    <div className="flex gap-[2px]">
-      {Array.from({ length: 10 }, (_, i) => (
-        <div
-          key={i}
-          className="h-2 flex-1 transition-all duration-500"
-          style={{
-            background: i < filled ? color : 'rgba(255,255,255,0.08)',
-            boxShadow: i < filled ? `0 0 4px ${color}40` : 'none',
-          }}
-        />
-      ))}
-    </div>
-  )
-}
-
 function Confetti({ color, burst }: { color: string; burst: number }) {
   const particles = useMemo(() => {
     const colors = [color, '#FF6B9D', '#00D4AA', '#FFD93D', '#6C5CE7', '#FF8A5C']
@@ -211,11 +193,7 @@ export function GlassJar() {
       setShake(true)
       setTimeout(() => setShake(false), 450)
     }
-
-    setToast({ name: e.name, amount: e.amount, message: e.message, id: e.id + '-' + now })
-    clearTimeout(toastTimer.current)
-    toastTimer.current = window.setTimeout(() => setToast(null), toastDur)
-  }, [toastDur, goal, liquidColor])
+  }, [goal])
 
   const handleFakeTip = useCallback(() => {
     const amounts = [5000, 10000, 15000, 25000, 50000, 100000]
@@ -279,6 +257,10 @@ export function GlassJar() {
             </div>
           )}
 
+          <div className="text-center" style={{ fontFamily: "'Fraunces', serif", color: '#fff', fontSize: 14 }}>
+            {fmtIDR(total)}
+          </div>
+
           <div className="relative">
             {showConfetti && <Confetti color={liquidColor} burst={confettiBurst} />}
             <div className="w-48 relative flex justify-center">
@@ -286,18 +268,6 @@ export function GlassJar() {
               {coinDrops.map(d => (
                 <CoinDrop key={d.id} id={d.id} color={d.color} />
               ))}
-            </div>
-          </div>
-
-          <div className="text-center" style={{ fontFamily: "'Fraunces', serif", color: '#fff', fontSize: 14 }}>
-            {fmtIDR(total)}
-          </div>
-
-          <div className="w-48">
-            <ProgressBar pct={pct} color={accent} />
-            <div className="flex justify-between mt-1" style={{ fontFamily: "'Fraunces', serif", fontSize: 7, color: '#666' }}>
-              <span>{fmtIDR(total)}</span>
-              <span>{fmtIDR(goal)}</span>
             </div>
           </div>
 
@@ -319,31 +289,6 @@ export function GlassJar() {
           )}
         </div>
       </div>
-
-      {toast && (
-        <div
-          key={toast.id}
-          className="gj-toast-bar gj-anim absolute left-1/2 -translate-x-1/2"
-          style={{
-            bottom: -36,
-            background: 'rgba(0,0,0,0.85)',
-            border: `1px solid ${liquidColor}40`,
-            padding: '6px 14px',
-            borderRadius: 8,
-            whiteSpace: 'nowrap',
-            animationDuration: '0.3s',
-          }}
-        >
-          {combo > 1 && (
-            <span className="mr-1 px-1 py-0.5 rounded-full" style={{ background: liquidColor, color: '#000', fontFamily: "'Fraunces', serif", fontSize: 7 }}>
-              x{combo}
-            </span>
-          )}
-          <span style={{ fontFamily: "'Fraunces', serif", fontSize: 9, color: liquidColor }}>
-            {toast.name} · {fmtIDR(toast.amount)}
-          </span>
-        </div>
-      )}
     </div>
   )
 
