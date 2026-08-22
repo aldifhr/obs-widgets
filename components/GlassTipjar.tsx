@@ -172,6 +172,7 @@ export function GlassJar() {
     return v > 0 ? v : 500000
   })
   const [liquidColor, setLiquidColor] = useState(searchParams.get('liquid') || '#FFC53D')
+  const [noBg, setNoBg] = useState(searchParams.has('nobg'))
   const [scale, setScale] = useState(() => {
     const v = Number(searchParams.get('scale'))
     return v > 0 ? v : 1
@@ -333,6 +334,7 @@ export function GlassJar() {
     server, goal: String(goal), liquid: liquidColor,
     scale: String(scale), toast: String(toastDur), hide: '1',
   })
+  if (noBg) widgetParams.set('nobg', '1')
   const [widgetUrl, setWidgetUrl] = useState('')
   useEffect(() => { setWidgetUrl(`${window.location.origin}/glass?${widgetParams.toString()}`) }, [widgetParams.toString()])
   const copyUrl = () => { navigator.clipboard.writeText(widgetUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
@@ -467,11 +469,14 @@ export function GlassJar() {
   )
 
   if (showWidget) {
+    const content = <Widget standalone />
     return (
       <div className="flex items-center justify-center p-6" style={{ minHeight: '100vh' }}>
-        <div className="rounded-2xl p-6 relative" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', border: `1px solid ${liquidColor}20` }}>
-          <Widget standalone />
-        </div>
+        {noBg ? content : (
+          <div className="rounded-2xl p-6 relative" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', border: `1px solid ${liquidColor}20` }}>
+            {content}
+          </div>
+        )}
       </div>
     )
   }
@@ -529,6 +534,12 @@ export function GlassJar() {
             <section>
               <SectionTitle>Toast Duration <span className="text-zinc-600 font-mono font-normal ml-1">{(toastDur / 1000).toFixed(1)}s</span></SectionTitle>
               <input type="range" min="2000" max="10000" step="500" value={toastDur} onChange={e => setToastDur(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: liquidColor }} />
+            </section>
+
+            <section>
+              <button onClick={() => setNoBg(n => !n)} className={`w-full py-2.5 rounded-xl text-xs font-medium border transition-all ${noBg ? 'border-white/30 bg-white/10 text-white' : 'border-studio-border bg-studio-800/50 text-zinc-500 hover:text-zinc-300'}`}>
+                {noBg ? 'Background: Hidden' : 'Background: Visible'}
+              </button>
             </section>
 
             <section>
