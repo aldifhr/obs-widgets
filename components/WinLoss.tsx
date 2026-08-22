@@ -117,20 +117,20 @@ export function WinLoss() {
             <div className="text-[10px] font-mono tracking-widest text-emerald-400 font-bold">WIN</div>
             <div className="text-white font-display font-bold text-3xl">{wins}</div>
             <div className="flex gap-1 mt-2">
-              <button onClick={() => apiWin(-1) && setWins(v => Math.max(0, v - 1))} className="flex-1 h-8 rounded-lg bg-studio-700 text-white">−</button>
-              <button onClick={() => apiWin(1) && setWins(v => v + 1)} className="flex-1 h-8 rounded-lg text-black font-bold" style={{ background: accent }}>+</button>
+              <button onClick={() => { apiWin(-1); setWins(v => Math.max(0, v - 1)) }} className="flex-1 h-8 rounded-lg bg-studio-700 text-white">−</button>
+              <button onClick={() => { apiWin(1); setWins(v => v + 1) }} className="flex-1 h-8 rounded-lg text-black font-bold" style={{ background: accent }}>+</button>
             </div>
           </div>
           <div className="bg-studio-800/50 border border-studio-border rounded-xl p-3 text-center">
             <div className="text-[10px] font-mono tracking-widest text-red-400 font-bold">LOSS</div>
             <div className="text-white font-display font-bold text-3xl">{losses}</div>
             <div className="flex gap-1 mt-2">
-              <button onClick={() => apiLoss(-1) && setLosses(v => Math.max(0, v - 1))} className="flex-1 h-8 rounded-lg bg-studio-700 text-white">−</button>
-              <button onClick={() => apiLoss(1) && setLosses(v => v + 1)} className="flex-1 h-8 rounded-lg bg-red-500 text-white font-bold">+</button>
+              <button onClick={() => { apiLoss(-1); setLosses(v => Math.max(0, v - 1)) }} className="flex-1 h-8 rounded-lg bg-studio-700 text-white">−</button>
+              <button onClick={() => { apiLoss(1); setLosses(v => v + 1) }} className="flex-1 h-8 rounded-lg bg-red-500 text-white font-bold">+</button>
             </div>
           </div>
         </div>
-        <button onClick={() => apiReset() && (setWins(0), setLosses(0))} className="w-full py-2 rounded-xl border border-studio-border bg-studio-800/50 text-red-400 text-xs font-medium hover:bg-studio-800">Reset</button>
+        <button onClick={() => { apiReset(); setWins(0); setLosses(0) }} className="w-full py-2 rounded-xl border border-studio-border bg-studio-800/50 text-red-400 text-xs font-medium hover:bg-studio-800">Reset</button>
       </div>
     )
   }
