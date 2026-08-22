@@ -13,9 +13,9 @@ function broadcast(data: unknown) {
   }
 }
 
-function verify(body: string, sig: string | undefined): boolean {
+function verify(body: string, sig: string | undefined, origin: string | null, host: string | null): boolean {
   if (!SECRET) return true
-  if (!sig) return false
+  if (!sig) return !origin || origin.includes(host || '')
   try {
     const h = createHmac('sha256', SECRET).update(body).digest('hex')
     return timingSafeEqual(Buffer.from(h, 'hex'), Buffer.from(sig, 'hex'))
@@ -37,8 +37,10 @@ async function fetchGift(giftId: string) {
 export async function POST(req: Request) {
   const raw = await req.text()
   const sig = req.headers.get('x-tako-signature') || undefined
+  const origin = req.headers.get('origin')
+  const host = req.headers.get('host')
 
-  if (!verify(raw, sig)) {
+  if (!verify(raw, sig, origin, host)) {
     return NextResponse.json({ error: 'invalid signature' }, { status: 403 })
   }
 
