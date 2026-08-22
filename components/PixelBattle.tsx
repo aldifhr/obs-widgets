@@ -66,10 +66,9 @@ export function PixelBattle() {
     setFighters(prev => prev.filter(f => f.name.toLowerCase() !== name.toLowerCase()))
   }
 
-  // mock TikTok chat integration via SSE + manual test
+  // TikTok live via dedicated SSE
   useEffect(() => {
-    // listen to tako webhook SSE for chat/viewer events (future)
-    const es = new EventSource('/api/tako/webhook')
+    const es = new EventSource('/api/tiktok/webhook')
     es.onmessage = (e) => {
       try {
         const d = JSON.parse(e.data)
