@@ -232,6 +232,9 @@ export function PixelTipjarCustomizer() {
   const handleEvent = useCallback((e: TakoEvent) => {
     if (e.kind === 'like') {
       setLikeCount(c => c + e.count)
+      setCoins(coins => Math.min(coins + Math.max(1, Math.round(e.count / 2)), MAX_COINS))
+      setFlash(true)
+      setTimeout(() => setFlash(false), 400)
       const id = 'heart-' + Date.now() + '-' + Math.random()
       const x = 20 + Math.random() * 60
       setHearts(h => [...h.slice(-8), { id, x }])
