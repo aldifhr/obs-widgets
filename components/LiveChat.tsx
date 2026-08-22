@@ -41,22 +41,31 @@ export function LiveChat() {
   })
   const listRef = useRef<HTMLDivElement>(null)
 
+  const maxMsgRef = useRef(maxMsg)
+  maxMsgRef.current = maxMsg
+  const hideAfterRef = useRef(hideAfter)
+  hideAfterRef.current = hideAfter
+
+  const addMessage = (msg: ChatMsg) => {
+    setMessages(m => [...m, msg].slice(-maxMsgRef.current))
+    if (hideAfterRef.current > 0) {
+      setTimeout(() => setMessages(m => m.filter(x => x.id !== msg.id)), hideAfterRef.current * 1000)
+    }
+  }
+
   useEffect(() => {
     const es = new EventSource('/api/tiktok/webhook')
     es.onmessage = (e) => {
       try {
         const d = JSON.parse(e.data)
         if (d.kind === 'chat') {
-          const msg: ChatMsg = { id: d.id || String(Date.now()), user: d.user || 'someone', message: d.message || '', at: Date.now() }
-          setMessages(m => [...m, msg].slice(-maxMsg))
-          if (hideAfter > 0) {
-            setTimeout(() => setMessages(m => m.filter(x => x.id !== msg.id)), hideAfter * 1000)
-          }
+          addMessage({ id: d.id || String(Date.now()), user: d.user || 'someone', message: d.message || '', at: Date.now() })
         }
       } catch {}
     }
+    es.onerror = () => es.close()
     return () => es.close()
-  }, [maxMsg, hideAfter])
+  }, [])
 
   useEffect(() => {
     if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight
@@ -65,7 +74,9 @@ export function LiveChat() {
   const [testUser, setTestUser] = useState('tester')
   const [testMsg, setTestMsg] = useState('halo bang!')
   const sendTest = async () => {
-    await fetch('/api/tiktok/webhook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'chat', data: { user: testUser, message: testMsg } }) })
+    const msg: ChatMsg = { id: String(Date.now()), user: testUser || 'tester', message: testMsg || 'halo', at: Date.now() }
+    addMessage(msg)
+    await fetch('/api/tiktok/webhook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'chat', data: { user: testUser, message: testMsg } }) }).catch(() => {})
   }
 
   const widgetParams = new URLSearchParams({ max: String(maxMsg), fs: String(fontSize), accent, hideAfter: String(hideAfter), hide: '1' })
