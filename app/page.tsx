@@ -17,6 +17,11 @@ export const listOverlay = [
     name: 'Starting Soon',
     description: 'Animasi text fullscreen + countdown',
     href: '/starting',
+  },
+  {
+    name: 'Pixel Battle',
+    description: 'Viewer TikTok jadi karakter pixel berantem • max 10',
+    href: '/battle',
   }
 ]
 export default function HomePage() {
