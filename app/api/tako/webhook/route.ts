@@ -50,13 +50,13 @@ export async function POST(req: Request) {
   }
 
   const d = body.data as Record<string, unknown>
-  let name = 'Anonymous', message = '', amount = (d.amount as number) || 0
+  let name = (d.name as string) || 'Anonymous', message = (d.message as string) || '', amount = (d.amount as number) || 0
 
   if (d.relatedGiftId) {
     const gift = await fetchGift(d.relatedGiftId as string)
     if (gift) {
       name = (gift.gifterName as string) || name
-      message = (gift.message as string) || ''
+      message = (gift.message as string) || message
       amount = (gift.amount as number) || amount
     }
   }
