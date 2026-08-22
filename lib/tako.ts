@@ -20,7 +20,17 @@ export interface TiktokLike {
   at: number
 }
 
-export type TakoEvent = TakoTip | TiktokLike
+export interface TiktokGift {
+  kind: 'gift'
+  id: string
+  user: string
+  giftName: string
+  diamondCount: number
+  repeatCount: number
+  at: number
+}
+
+export type TakoEvent = TakoTip | TiktokLike | TiktokGift
 export type TakoStatus = 'connecting' | 'open' | 'closed'
 
 export function useTakoEvents(server: string, onData?: (e: TakoEvent) => void) {

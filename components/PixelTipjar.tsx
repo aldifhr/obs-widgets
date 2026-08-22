@@ -238,6 +238,22 @@ export function PixelTipjarCustomizer() {
       setTimeout(() => setHearts(h => h.filter(h => h.id !== id)), 1500)
       return
     }
+    if (e.kind === 'gift') {
+      setTotal(t => t + e.diamondCount)
+      setCoins(c => Math.min(c + Math.max(1, Math.round(e.diamondCount / 5)), MAX_COINS))
+      setFlash(true)
+      setTimeout(() => setFlash(false), 600)
+
+      const now = Date.now()
+      const flyId = e.id + '-fly-' + now
+      setFlyingCoin({ id: flyId })
+      setTimeout(() => setFlyingCoin(f => (f?.id === flyId ? null : f)), 700)
+
+      setToast({ name: e.user, amount: e.diamondCount, message: `${e.giftName} x${e.repeatCount}`, id: e.id + '-' + now })
+      clearTimeout(toastTimer.current)
+      toastTimer.current = window.setTimeout(() => setToast(null), toastDur)
+      return
+    }
     if (e.kind !== 'tip') return
     setTotal(t => t + e.amount)
     setCoins(c => Math.min(c + Math.max(1, Math.round(e.amount / 5000)), MAX_COINS))

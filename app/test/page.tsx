@@ -72,6 +72,27 @@ export default function TestPage() {
     setLoading(false)
   }
 
+  const sendGift = async () => {
+    setLoading(true)
+    setResult('sending...')
+    try {
+      const r = await fetch('/api/tako/webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'gift',
+          data: { user: 'generous_fan', giftName: 'Rose', diamondCount: 5, repeatCount: 5 },
+        }),
+      })
+      const t = await r.text()
+      setResult(t)
+      setHistory(prev => ['🎁 generous_fan Rose x5 (25💎)', ...prev.slice(0, 19)])
+    } catch (e: unknown) {
+      setResult(String(e))
+    }
+    setLoading(false)
+  }
+
   const sendBatch = async () => {
     for (const p of PRESETS) {
       await send(p.name, p.amount, p.message)
@@ -109,10 +130,13 @@ export default function TestPage() {
               {loading ? 'Sending...' : 'Send Tip'}
             </button>
             <button onClick={() => sendLike(10)} disabled={loading} className="py-2.5 px-4 rounded-xl font-semibold text-sm border border-pink-500/30 bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 hover:text-pink-300 transition-all active:scale-[0.98] disabled:opacity-50">
-              ❤️ Like x10
+              ❤️ Like
+            </button>
+            <button onClick={sendGift} disabled={loading} className="py-2.5 px-4 rounded-xl font-semibold text-sm border border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300 transition-all active:scale-[0.98] disabled:opacity-50">
+              🎁 Gift
             </button>
             <button onClick={sendBatch} disabled={loading} className="py-2.5 px-4 rounded-xl font-semibold text-sm border border-studio-border bg-studio-800/50 text-zinc-300 hover:bg-studio-800 hover:text-white hover:border-white/15 transition-all active:scale-[0.98] disabled:opacity-50">
-              Batch x6
+              Batch
             </button>
           </div>
         </div>

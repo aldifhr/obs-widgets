@@ -57,6 +57,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true })
   }
 
+  if (body.event === 'gift') {
+    const d = body.data as Record<string, unknown>
+    const user = (d.user as string) || 'someone'
+    const giftName = (d.giftName as string) || 'Gift'
+    const diamondCount = (d.diamondCount as number) || 0
+    const repeatCount = (d.repeatCount as number) || 1
+    const ev = { id: String(++nextId), kind: 'gift', user, giftName, diamondCount, repeatCount, at: Date.now() }
+    console.log(`[gift] ${user} ${giftName} x${repeatCount} (${diamondCount}💎)`)
+    broadcast(ev)
+    return NextResponse.json({ ok: true })
+  }
+
   if (body.event !== 'payment.success') {
     return NextResponse.json({ ok: true, skipped: true })
   }
