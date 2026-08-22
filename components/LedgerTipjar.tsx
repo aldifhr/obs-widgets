@@ -37,8 +37,8 @@ export function LedgerTipjar() {
   const [mode, setMode] = useState<'light' | 'dark'>((searchParams.get('mode') as 'light' | 'dark') || 'light')
   const [goal, setGoal] = useState(() => { const v = Number(searchParams.get('goal')); return v > 0 ? v : 500000 })
   const [copied, setCopied] = useState(false)
-  const [total, setTotal] = useState(0)
-  const [rows, setRows] = useState<LedgerRow[]>([])
+  const [total, setTotal] = useState(() => { const v = localStorage.getItem('ledger-total'); return v ? Number(v) : 0 })
+  const [rows, setRows] = useState<LedgerRow[]>(() => { const v = localStorage.getItem('ledger-rows'); return v ? JSON.parse(v) : [] })
   const [toast, setToast] = useState<{ name: string; amount: number } | null>(null)
   const [pulse, setPulse] = useState(false)
   const [newRow, setNewRow] = useState<number | null>(null)
@@ -80,6 +80,14 @@ export function LedgerTipjar() {
 
   const pct = Math.min(total / goal, 1)
   const reached = pct >= 1
+
+  useEffect(() => {
+    localStorage.setItem('ledger-total', String(total))
+  }, [total])
+
+  useEffect(() => {
+    localStorage.setItem('ledger-rows', JSON.stringify(rows))
+  }, [rows])
 
   const widgetParams = new URLSearchParams({ goal: String(goal), mode, hide: '1' })
   const [widgetUrl, setWidgetUrl] = useState('')
