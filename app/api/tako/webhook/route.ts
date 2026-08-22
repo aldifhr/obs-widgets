@@ -69,6 +69,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true })
   }
 
+  if (body.event === 'chat') {
+    const d = body.data as Record<string, unknown>
+    const user = (d.user as string) || 'someone'
+    broadcast({ id: String(++nextId), kind: 'chat', user, message: d.message, at: Date.now() })
+    return NextResponse.json({ ok: true })
+  }
+
+  if (body.event === 'member') {
+    const d = body.data as Record<string, unknown>
+    const user = (d.user as string) || 'someone'
+    broadcast({ id: String(++nextId), kind: 'member', user, action: d.action, at: Date.now() })
+    return NextResponse.json({ ok: true })
+  }
+
   if (body.event === 'live.start') {
     const creator = body.creator as Record<string, unknown> | undefined
     const live = body.live as Record<string, unknown> | undefined
