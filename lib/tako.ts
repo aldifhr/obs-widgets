@@ -22,7 +22,7 @@ export function useTakoEvents(server: string, onData?: (e: TakoEvent) => void) {
   const [status, setStatus] = useState<TakoStatus>('connecting')
 
   useEffect(() => {
-    const url = server ? `${server.replace(/\/$/, '')}/events` : '/events'
+    const url = server ? `${server.replace(/\/$/, '')}/api/tako/webhook` : '/api/tako/webhook'
     const es = new EventSource(url)
     es.onopen = () => setStatus('open')
     es.onerror = () => setStatus('connecting')
