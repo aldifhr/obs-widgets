@@ -333,7 +333,7 @@ export function GlassJar() {
     scale: String(scale), toast: String(toastDur), hide: '1',
   })
   const [widgetUrl, setWidgetUrl] = useState('')
-  useEffect(() => { setWidgetUrl(`${window.location.origin}/tipjar?${widgetParams.toString()}`) }, [widgetParams.toString()])
+  useEffect(() => { setWidgetUrl(`${window.location.origin}/glass?${widgetParams.toString()}`) }, [widgetParams.toString()])
   const copyUrl = () => { navigator.clipboard.writeText(widgetUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const Widget = ({ standalone }: { standalone?: boolean }) => (
