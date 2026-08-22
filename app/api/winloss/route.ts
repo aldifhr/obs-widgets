@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 const clients = new Set<ReadableStreamDefaultController>()
 let nextId = 0
+let store = { wins: 0, losses: 0 }
 
 function broadcast(data: unknown) {
   const msg = `data: ${JSON.stringify(data)}\n\n`
@@ -18,22 +19,25 @@ export async function POST(req: Request) {
   const delta = (body.delta as number) || 1
 
   if (type === 'win') {
-    broadcast({ id: String(++nextId), kind: 'win', delta, at: Date.now() })
-    return NextResponse.json({ ok: true })
+    store.wins = Math.max(0, store.wins + delta)
+    broadcast({ id: String(++nextId), kind: 'set', wins: store.wins, losses: store.losses, at: Date.now() })
+    return NextResponse.json({ ok: true, ...store })
   }
   if (type === 'loss') {
-    broadcast({ id: String(++nextId), kind: 'loss', delta, at: Date.now() })
-    return NextResponse.json({ ok: true })
+    store.losses = Math.max(0, store.losses + delta)
+    broadcast({ id: String(++nextId), kind: 'set', wins: store.wins, losses: store.losses, at: Date.now() })
+    return NextResponse.json({ ok: true, ...store })
   }
   if (type === 'reset') {
-    broadcast({ id: String(++nextId), kind: 'reset', at: Date.now() })
-    return NextResponse.json({ ok: true })
+    store = { wins: 0, losses: 0 }
+    broadcast({ id: String(++nextId), kind: 'set', wins: 0, losses: 0, at: Date.now() })
+    return NextResponse.json({ ok: true, ...store })
   }
   if (type === 'set') {
-    const wins = Number(body.wins) || 0
-    const losses = Number(body.losses) || 0
-    broadcast({ id: String(++nextId), kind: 'set', wins, losses, at: Date.now() })
-    return NextResponse.json({ ok: true })
+    store.wins = Math.max(0, Number(body.wins) || 0)
+    store.losses = Math.max(0, Number(body.losses) || 0)
+    broadcast({ id: String(++nextId), kind: 'set', wins: store.wins, losses: store.losses, at: Date.now() })
+    return NextResponse.json({ ok: true, ...store })
   }
 
   return NextResponse.json({ error: 'type must be win|loss|reset|set' }, { status: 400 })
@@ -45,16 +49,18 @@ export async function GET(req: Request) {
   const loss = url.searchParams.get('loss')
   const reset = url.searchParams.get('reset')
 
-  // Allow GET for simple integration: /api/winloss?win=1
   if (win !== null || loss !== null || reset !== null) {
-    if (reset !== null) broadcast({ id: String(++nextId), kind: 'reset', at: Date.now() })
-    else if (win !== null) broadcast({ id: String(++nextId), kind: 'win', delta: Number(win) || 1, at: Date.now() })
-    else if (loss !== null) broadcast({ id: String(++nextId), kind: 'loss', delta: Number(loss) || 1, at: Date.now() })
-    return NextResponse.json({ ok: true })
+    if (reset !== null) store = { wins: 0, losses: 0 }
+    else if (win !== null) store.wins = Math.max(0, store.wins + (Number(win) || 1))
+    else if (loss !== null) store.losses = Math.max(0, store.losses + (Number(loss) || 1))
+    broadcast({ id: String(++nextId), kind: 'set', wins: store.wins, losses: store.losses, at: Date.now() })
+    return NextResponse.json({ ok: true, ...store })
   }
 
   const stream = new ReadableStream({
     start(controller) {
+      // send current state on connect
+      controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ id: String(++nextId), kind: 'set', wins: store.wins, losses: store.losses, at: Date.now() })}\n\n`))
       controller.enqueue(new TextEncoder().encode('retry: 3000\n\n'))
       clients.add(controller)
       const hb = setInterval(() => {
