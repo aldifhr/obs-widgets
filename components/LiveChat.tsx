@@ -53,8 +53,11 @@ export function LiveChat() {
     }
   }
 
+  const serverUrl = searchParams.get('server') || ''
+  const sseUrl = serverUrl ? `${serverUrl.replace(/\/$/, '')}/events` : '/api/tiktok/webhook'
+
   useEffect(() => {
-    const es = new EventSource('/api/tiktok/webhook')
+    const es = new EventSource(sseUrl)
     es.onmessage = (e) => {
       try {
         const d = JSON.parse(e.data)
@@ -63,9 +66,9 @@ export function LiveChat() {
         }
       } catch {}
     }
-    es.onerror = () => es.close()
+    es.onerror = () => {}
     return () => es.close()
-  }, [])
+  }, [sseUrl])
 
   useEffect(() => {
     if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight
