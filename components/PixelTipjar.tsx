@@ -175,13 +175,21 @@ export function PixelTipjarCustomizer() {
   const searchParams = useSearchParams()
   const showWidget = searchParams.has('hide')
 
+  useEffect(() => {
+    if (showWidget) {
+      document.documentElement.style.background = 'transparent'
+      document.body.style.background = 'transparent'
+      document.body.style.minHeight = '100vh'
+    }
+  }, [showWidget])
+
   const [server, setServer] = useState(searchParams.get('server') || '')
   const [goal, setGoal] = useState(() => {
     const v = Number(searchParams.get('goal'))
     return v > 0 ? v : 500000
   })
   const [coinColor, setCoinColor] = useState(searchParams.get('coin') || '#FFC53D')
-  const [bgColor, setBgColor] = useState(searchParams.get('bg') || '#000000')
+  const [bgColor, setBgColor] = useState(searchParams.get('bg') || 'transparent')
   const [scale, setScale] = useState(() => {
     const v = Number(searchParams.get('scale'))
     return v > 0 ? v : 1
@@ -303,7 +311,7 @@ export function PixelTipjarCustomizer() {
       className={shake ? 'ptj-shake ptj-anim' : ''}
       style={{ animationDuration: shake ? '450ms' : undefined }}
     >
-      <div className="flex flex-col items-center gap-3" style={{ minHeight: standalone ? '100vh' : undefined, transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+      <div className="flex flex-col items-center gap-3" style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
         {topSupporter && (
           <div
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
@@ -391,8 +399,10 @@ export function PixelTipjarCustomizer() {
 
   if (showWidget) {
     return (
-      <div className="flex items-center justify-center" style={{ background: bgColor, minHeight: '100vh' }}>
-        <Widget standalone />
+      <div className="flex items-center justify-center p-6" style={{ background: bgColor === 'transparent' ? undefined : bgColor, minHeight: '100vh' }}>
+        <div className="rounded-2xl p-6" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', border: `1px solid ${coinColor}20` }}>
+          <Widget standalone />
+        </div>
       </div>
     )
   }
