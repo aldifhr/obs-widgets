@@ -33,6 +33,7 @@ export function LiveChat() {
     return v > 0 ? v : 13
   })
   const [accent, setAccent] = useState(searchParams.get('accent') || '#FFC53D')
+  const uiAccent = '#FFC53D'
   const [noBg, setNoBg] = useState(searchParams.has('nobg'))
   const [hideAfter, setHideAfter] = useState(() => {
     const v = Number(searchParams.get('hideAfter'))
@@ -107,7 +108,7 @@ export function LiveChat() {
         <div className="w-full lg:w-[380px] bg-studio-900 border-l border-studio-border flex flex-col">
           <div className="p-6 border-b border-studio-border">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${accent}15`, color: accent }}>💬</div>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${uiAccent}15`, color: uiAccent }}>💬</div>
               <div>
                 <h2 className="text-white font-display font-semibold">Live Chat</h2>
                 <p className="text-zinc-500 text-xs font-mono">TikTok live chat overlay</p>
@@ -118,11 +119,11 @@ export function LiveChat() {
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <section>
               <SectionTitle>Max Messages <span className="text-zinc-600 font-mono font-normal ml-1">{maxMsg}</span></SectionTitle>
-              <input type="range" min={5} max={50} step={5} value={maxMsg} onChange={e => setMaxMsg(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: accent }} />
+              <input type="range" min={5} max={50} step={5} value={maxMsg} onChange={e => setMaxMsg(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: uiAccent }} />
             </section>
             <section>
               <SectionTitle>Font Size <span className="text-zinc-600 font-mono font-normal ml-1">{fontSize}px</span></SectionTitle>
-              <input type="range" min={10} max={20} step={1} value={fontSize} onChange={e => setFontSize(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: accent }} />
+              <input type="range" min={10} max={20} step={1} value={fontSize} onChange={e => setFontSize(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: uiAccent }} />
             </section>
             <section>
               <SectionTitle>Hide After (sec, 0 = never)</SectionTitle>
@@ -153,7 +154,7 @@ export function LiveChat() {
           </div>
 
           <div className="p-6 border-t border-studio-border">
-            <button onClick={copyUrl} className="w-full py-3 rounded-xl font-semibold text-sm text-studio-950" style={{ background: accent, boxShadow: `0 4px 20px ${accent}30` }}>{copied ? 'Copied!' : 'Copy Widget URL'}</button>
+            <button onClick={copyUrl} className="w-full py-3 rounded-xl font-semibold text-sm text-studio-950" style={{ background: uiAccent, boxShadow: `0 4px 20px ${uiAccent}30` }}>{copied ? 'Copied!' : 'Copy Widget URL'}</button>
             <p className="text-zinc-600 text-[10px] mt-3 font-mono break-all leading-relaxed">{widgetUrl}</p>
           </div>
         </div>
