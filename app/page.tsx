@@ -12,6 +12,11 @@ export const listOverlay = [
     name: 'Win / Loss',
     description: 'Counter win & loss dengan winrate',
     href: '/winloss',
+  },
+  {
+    name: 'Starting Soon',
+    description: 'Animasi text fullscreen + countdown',
+    href: '/starting',
   }
 ]
 export default function HomePage() {
