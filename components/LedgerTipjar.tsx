@@ -95,13 +95,7 @@ export function LedgerTipjar() {
   const copyUrl = () => { navigator.clipboard.writeText(widgetUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const Ledger = () => (
-    <div style={{ position: 'relative', width: '100%', maxWidth: 320, background: t.card, borderRadius: 4, boxShadow: t.shadow, display: 'flex', flexDirection: 'column', transition: 'background .3s' }}>
-      {/* toast */}
-      {toast && (
-        <div style={{ position: 'absolute', top: -40, left: '50%', transform: 'translateX(-50%)', background: mode === 'dark' ? '#2a2a2e' : '#1B2A4A', color: '#fff', padding: '6px 14px', borderRadius: 8, fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, whiteSpace: 'nowrap', boxShadow: '0 4px 16px rgba(0,0,0,0.3)', animation: 'ledger-toast-in 0.3s ease', zIndex: 10 }}>
-          {toast.name} · {fmtIDR(toast.amount)}
-        </div>
-      )}
+    <div style={{ width: '100%', maxWidth: 320, background: t.card, borderRadius: 4, boxShadow: t.shadow, display: 'flex', flexDirection: 'column', transition: 'background .3s', overflow: 'hidden' }}>
       <div style={{ padding: '18px 20px 10px', borderBottom: `1px dashed ${t.border}` }}>
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: 2, color: t.eyebrow, fontWeight: 600 }}>BUKU TIP · LIVE</div>
         <div style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: 30, color: t.total, animation: pulse ? 'ledger-pulse 0.4s ease' : undefined }}>{fmtIDR(total)}</div>
@@ -124,6 +118,11 @@ export function LedgerTipjar() {
       </div>
       {reached && (
         <div style={{ alignSelf: 'flex-end', margin: '0 20px 16px auto', fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: 13, color: t.stamp, border: `2px solid ${t.stamp}`, padding: '4px 10px', borderRadius: 4, transform: 'rotate(-6deg)', letterSpacing: 2 }}>LUNAS</div>
+      )}
+      {toast && (
+        <div style={{ padding: '8px 20px', background: mode === 'dark' ? '#ffffff08' : '#D4A01710', borderTop: `1px solid ${t.border}`, fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: t.eyebrow, animation: 'ledger-toast-in 0.3s ease' }}>
+          {toast.name} · {fmtIDR(toast.amount)}
+        </div>
       )}
     </div>
   )
