@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { SectionTitle } from '../lib/platforms'
 
@@ -36,42 +36,75 @@ export function WinLoss() {
     return v > 0 ? v : 1
   })
   const [copied, setCopied] = useState(false)
+  const bcRef = useRef<BroadcastChannel | null>(null)
 
   useEffect(() => { localStorage.setItem('wl-wins', String(wins)) }, [wins])
   useEffect(() => { localStorage.setItem('wl-losses', String(losses)) }, [losses])
 
-  // SSE — single source of truth is server store, broadcast 'set'
+  // BroadcastChannel for instant same-machine sync (dock <-> overlay)
+  useEffect(() => {
+    try {
+      const bc = new BroadcastChannel('winloss')
+      bcRef.current = bc
+      bc.onmessage = (e) => {
+        const d = e.data as { wins?: number; losses?: number }
+        if (typeof d.wins === 'number') setWins(d.wins)
+        if (typeof d.losses === 'number') setLosses(d.losses)
+      }
+      return () => bc.close()
+    } catch {}
+  }, [])
+
+  const broadcast = (w: number, l: number) => {
+    try { bcRef.current?.postMessage({ wins: w, losses: l }) } catch {}
+    // also push to server for cross-device / API callers, fire-and-forget
+    fetch('/api/winloss', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'set', wins: w, losses: l }) }).catch(() => {})
+  }
+
+  // SSE fallback for remote API triggers
   useEffect(() => {
     const es = new EventSource('/api/winloss')
-    let first = true
     es.onmessage = (e) => {
       try {
         const data = JSON.parse(e.data)
         if (data.kind === 'set') {
-          // ignore initial 0,0 if we have local data — push local to server instead
-          if (first && data.wins === 0 && data.losses === 0 && (wins > 0 || losses > 0)) {
-            fetch('/api/winloss', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'set', wins, losses }) })
-          } else {
-            setWins(data.wins ?? 0)
-            setLosses(data.losses ?? 0)
-          }
-          first = false
+          setWins(data.wins ?? 0)
+          setLosses(data.losses ?? 0)
         }
       } catch {}
     }
     return () => es.close()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const apiWin = (d = 1) => fetch('/api/winloss', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'win', delta: d }) })
-  const apiLoss = (d = 1) => fetch('/api/winloss', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'loss', delta: d }) })
-  const apiReset = () => fetch('/api/winloss', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'reset' }) })
+  // storage event fallback
+  useEffect(() => {
+    const h = (e: StorageEvent) => {
+      if (e.key === 'wl-wins' && e.newValue !== null) setWins(Number(e.newValue) || 0)
+      if (e.key === 'wl-losses' && e.newValue !== null) setLosses(Number(e.newValue) || 0)
+    }
+    window.addEventListener('storage', h)
+    return () => window.removeEventListener('storage', h)
+  }, [])
+
+  const doWin = (d: number) => {
+    const nw = Math.max(0, wins + d)
+    setWins(nw)
+    broadcast(nw, losses)
+  }
+  const doLoss = (d: number) => {
+    const nl = Math.max(0, losses + d)
+    setLosses(nl)
+    broadcast(wins, nl)
+  }
+  const doReset = () => {
+    setWins(0); setLosses(0)
+    broadcast(0, 0)
+  }
 
   const total = wins + losses
   const winrate = total === 0 ? 0 : (wins / total) * 100
 
   const widgetParams = new URLSearchParams({
-    win: String(wins), loss: String(losses),
     scale: String(scale), hide: '1',
   })
   if (noBg) widgetParams.set('nobg', '1')
@@ -125,20 +158,20 @@ export function WinLoss() {
             <div className="text-[10px] font-mono tracking-widest text-emerald-400 font-bold">WIN</div>
             <div className="text-white font-display font-bold text-3xl">{wins}</div>
             <div className="flex gap-1 mt-2">
-              <button onClick={() => apiWin(-1)} className="flex-1 h-8 rounded-lg bg-studio-700 text-white">−</button>
-              <button onClick={() => apiWin(1)} className="flex-1 h-8 rounded-lg text-black font-bold" style={{ background: accent }}>+</button>
+              <button onClick={() => doWin(-1)} className="flex-1 h-8 rounded-lg bg-studio-700 text-white">−</button>
+              <button onClick={() => doWin(1)} className="flex-1 h-8 rounded-lg text-black font-bold" style={{ background: accent }}>+</button>
             </div>
           </div>
           <div className="bg-studio-800/50 border border-studio-border rounded-xl p-3 text-center">
             <div className="text-[10px] font-mono tracking-widest text-red-400 font-bold">LOSS</div>
             <div className="text-white font-display font-bold text-3xl">{losses}</div>
             <div className="flex gap-1 mt-2">
-              <button onClick={() => apiLoss(-1)} className="flex-1 h-8 rounded-lg bg-studio-700 text-white">−</button>
-              <button onClick={() => apiLoss(1)} className="flex-1 h-8 rounded-lg bg-red-500 text-white font-bold">+</button>
+              <button onClick={() => doLoss(-1)} className="flex-1 h-8 rounded-lg bg-studio-700 text-white">−</button>
+              <button onClick={() => doLoss(1)} className="flex-1 h-8 rounded-lg bg-red-500 text-white font-bold">+</button>
             </div>
           </div>
         </div>
-        <button onClick={() => apiReset()} className="w-full py-2 rounded-xl border border-studio-border bg-studio-800/50 text-red-400 text-xs font-medium hover:bg-studio-800">Reset</button>
+        <button onClick={doReset} className="w-full py-2 rounded-xl border border-studio-border bg-studio-800/50 text-red-400 text-xs font-medium hover:bg-studio-800">Reset</button>
       </div>
     )
   }
@@ -169,17 +202,17 @@ export function WinLoss() {
                 <div>
                   <SectionTitle>Win</SectionTitle>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => apiWin(-1)} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">−</button>
+                    <button onClick={() => doWin(-1)} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">−</button>
                     <div className="flex-1 text-center text-white font-display font-bold text-xl">{wins}</div>
-                    <button onClick={() => apiWin(1)} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">+</button>
+                    <button onClick={() => doWin(1)} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">+</button>
                   </div>
                 </div>
                 <div>
                   <SectionTitle>Loss</SectionTitle>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => apiLoss(-1)} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">−</button>
+                    <button onClick={() => doLoss(-1)} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">−</button>
                     <div className="flex-1 text-center text-white font-display font-bold text-xl">{losses}</div>
-                    <button onClick={() => apiLoss(1)} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">+</button>
+                    <button onClick={() => doLoss(1)} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">+</button>
                   </div>
                 </div>
               </div>
@@ -198,7 +231,7 @@ export function WinLoss() {
             </section>
 
             <section>
-              <button onClick={() => apiReset()} className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] border border-studio-border bg-studio-800/50 text-red-400 hover:bg-studio-800 hover:text-red-300 hover:border-red-400/15">
+              <button onClick={doReset} className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] border border-studio-border bg-studio-800/50 text-red-400 hover:bg-studio-800 hover:text-red-300 hover:border-red-400/15">
                 Reset
               </button>
             </section>
