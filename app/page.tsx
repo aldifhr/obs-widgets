@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation'
 export const listOverlay = [
   {
     name: 'Glass Tipjar',
-    description: 'Glass Tipjar',
+    description: 'Toples kaca — liquid fill sesuai donasi',
     href: '/glass',
   },
   {
-    name: 'Another Overlay',
-    description: 'Description for another overlay',
-    href: '/another',
+    name: 'Win / Loss',
+    description: 'Counter win & loss dengan winrate',
+    href: '/winloss',
   }
 ]
 export default function HomePage() {
