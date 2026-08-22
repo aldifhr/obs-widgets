@@ -11,6 +11,7 @@ const COIN_W = 6
 const ROW_H = 6
 const BASE_Y = 89
 const MAX_COINS = 40
+const MILESTONES = [0.25, 0.5, 0.75, 1]
 
 function coinSlot(i: number) {
   const col = i % 4
@@ -44,12 +45,26 @@ function PixelCoin({ x, y, color, drop, delay }: { x: number; y: number; color: 
   )
 }
 
-function PixelJar({ coins, coinColor, flash }: { coins: number; coinColor: string; flash: boolean }) {
+// Coin that arcs from above the lid down into the jar mouth whenever a tip lands.
+function FlyingCoin({ color, id }: { color: string; id: string }) {
+  return (
+    <svg viewBox="0 0 96 112" className="absolute inset-0 w-full h-full pointer-events-none" style={{ imageRendering: 'pixelated' }}>
+      <g key={id} className="ptj-coin-fly ptj-anim" style={{ animationDuration: '0.65s', animationFillMode: 'both' }}>
+        <rect x={-3} y={-1} width={6} height={6} fill={color} />
+        <rect x={-2} y={0} width={4} height={1} fill="rgba(255,255,255,0.5)" />
+      </g>
+    </svg>
+  )
+}
+
+function PixelJar({ coins, coinColor, flash, glow }: { coins: number; coinColor: string; flash: boolean; glow: number }) {
   const slots = useMemo(() => {
     const s = []
     for (let i = 0; i < Math.min(coins, MAX_COINS); i++) s.push(coinSlot(i))
     return s
   }, [coins])
+
+  const glowOpacity = 0.2 + glow * 0.35
 
   return (
     <svg viewBox="0 0 96 112" className="w-full h-auto" style={{ imageRendering: 'pixelated' }}>
@@ -65,8 +80,14 @@ function PixelJar({ coins, coinColor, flash }: { coins: number; coinColor: strin
       <rect x={28} y={16} width={40} height={2} fill="#5C3A21" />
       <rect x={42} y={13} width={12} height={3} fill="#3A2417" />
 
-      {/* jar body */}
-      <rect x={24} y={18} width={48} height={78} rx={3} fill="rgba(155,232,222,0.07)" stroke={flash ? coinColor : 'rgba(155,232,222,0.2)'} strokeWidth={2} style={flash ? { filter: `drop-shadow(0 0 6px ${coinColor})` } : undefined} />
+      {/* jar body — subtle glow rises with fill progress, flares on flash */}
+      <rect
+        x={24} y={18} width={48} height={78} rx={3}
+        fill="rgba(155,232,222,0.07)"
+        stroke={flash ? coinColor : `rgba(155,232,222,${glowOpacity})`}
+        strokeWidth={flash ? 2 : 1.5}
+        style={{ filter: flash ? `drop-shadow(0 0 6px ${coinColor})` : glow > 0.5 ? `drop-shadow(0 0 3px ${coinColor}40)` : undefined }}
+      />
 
       {/* highlight */}
       <rect x={28} y={22} width={3} height={70} fill="rgba(255,255,255,0.06)" />
@@ -103,7 +124,7 @@ function ProgressBar({ pct, color }: { pct: number; color: string }) {
   )
 }
 
-function Confetti({ color }: { color: string }) {
+function Confetti({ color, burst }: { color: string; burst: number }) {
   const particles = useMemo(() => {
     const colors = [color, '#FF6B9D', '#00D4AA', '#FFD93D', '#6C5CE7', '#FF8A5C']
     return Array.from({ length: 24 }, (_, i) => ({
@@ -117,7 +138,9 @@ function Confetti({ color }: { color: string }) {
       color: colors[i % colors.length],
       delay: Math.random() * 200,
     }))
-  }, [color])
+    // burst forces a fresh particle set each time a milestone fires
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [color, burst])
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -173,9 +196,28 @@ export function PixelTipjarCustomizer() {
   const [coins, setCoins] = useState(0)
   const [toast, setToast] = useState<{ name: string; amount: number; message: string; id: string } | null>(null)
   const [flash, setFlash] = useState(false)
-  const [celebrated, setCelebrated] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
+  const [confettiBurst, setConfettiBurst] = useState(0)
+  const [milestone, setMilestone] = useState<string | null>(null)
+  const [combo, setCombo] = useState(1)
+  const [shake, setShake] = useState(false)
+  const [flyingCoin, setFlyingCoin] = useState<{ id: string } | null>(null)
+  const [topSupporter, setTopSupporter] = useState<{ name: string; total: number } | null>(null)
+
   const toastTimer = useRef<number>(0)
+  const milestoneTimer = useRef<number>(0)
+  const lastTipAt = useRef<number>(0)
+  const milestonesHit = useRef<Set<number>>(new Set())
+  const supporterTotals = useRef<Map<string, number>>(new Map())
+
+  const fireMilestone = useCallback((label: string) => {
+    setMilestone(label)
+    setShowConfetti(true)
+    setConfettiBurst(b => b + 1)
+    setTimeout(() => setShowConfetti(false), 1500)
+    clearTimeout(milestoneTimer.current)
+    milestoneTimer.current = window.setTimeout(() => setMilestone(null), 2600)
+  }, [])
 
   const handleEvent = useCallback((e: TakoEvent) => {
     if (e.kind !== 'tip') return
@@ -183,10 +225,34 @@ export function PixelTipjarCustomizer() {
     setCoins(c => Math.min(c + Math.max(1, Math.round(e.amount / 5000)), MAX_COINS))
     setFlash(true)
     setTimeout(() => setFlash(false), 600)
-    setToast({ name: e.name, amount: e.amount, message: e.message, id: e.id + '-' + Date.now() })
+
+    // combo streak — consecutive tips within 8s bump the multiplier
+    const now = Date.now()
+    const isStreak = now - lastTipAt.current < 8000
+    lastTipAt.current = now
+    setCombo(c => (isStreak ? Math.min(c + 1, 9) : 1))
+
+    // top supporter tracking
+    const prevTotal = supporterTotals.current.get(e.name) || 0
+    const nextTotal = prevTotal + e.amount
+    supporterTotals.current.set(e.name, nextTotal)
+    setTopSupporter(cur => (!cur || nextTotal > cur.total ? { name: e.name, total: nextTotal } : cur))
+
+    // flying coin arc into the jar
+    const flyId = e.id + '-fly-' + now
+    setFlyingCoin({ id: flyId })
+    setTimeout(() => setFlyingCoin(f => (f?.id === flyId ? null : f)), 700)
+
+    // big-tip screen shake for extra juice
+    if (e.amount >= Math.max(goal * 0.1, 50000)) {
+      setShake(true)
+      setTimeout(() => setShake(false), 450)
+    }
+
+    setToast({ name: e.name, amount: e.amount, message: e.message, id: e.id + '-' + now })
     clearTimeout(toastTimer.current)
     toastTimer.current = window.setTimeout(() => setToast(null), toastDur)
-  }, [toastDur])
+  }, [toastDur, goal])
 
   const handleFakeTip = useCallback(() => {
     const amounts = [5000, 10000, 15000, 25000, 50000, 100000]
@@ -209,13 +275,20 @@ export function PixelTipjarCustomizer() {
 
   const pct = Math.min(total / goal, 1)
 
+  // milestone watcher — fires once per threshold, resets when goal changes
   useEffect(() => {
-    if (pct >= 1 && !celebrated) {
-      setCelebrated(true)
-      setShowConfetti(true)
-      setTimeout(() => setShowConfetti(false), 1500)
+    for (const t of MILESTONES) {
+      if (pct >= t && !milestonesHit.current.has(t)) {
+        milestonesHit.current.add(t)
+        fireMilestone(t === 1 ? 'TARGET TERCAPAI!' : `${Math.round(t * 100)}% MENUJU TARGET!`)
+        break
+      }
     }
-  }, [pct, celebrated])
+  }, [pct, fireMilestone])
+
+  useEffect(() => {
+    milestonesHit.current.clear()
+  }, [goal])
 
   const widgetParams = new URLSearchParams({
     server, goal: String(goal), coin: coinColor, bg: bgColor,
@@ -226,51 +299,93 @@ export function PixelTipjarCustomizer() {
   const copyUrl = () => { navigator.clipboard.writeText(widgetUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const Widget = ({ standalone }: { standalone?: boolean }) => (
-    <div className="flex flex-col items-center gap-3" style={{ minHeight: standalone ? '100vh' : undefined, transform: `scale(${scale})`, transformOrigin: 'center center' }}>
-      <div className="relative">
-        {showConfetti && <Confetti color={coinColor} />}
-        <div className="w-48 relative">
-          <PixelJar coins={coins} coinColor={coinColor} flash={flash} />
-        </div>
-      </div>
-
-      <div className="text-center" style={{ fontFamily: 'var(--font-pixel)', color: coinColor, fontSize: 11, letterSpacing: 1 }}>
-        TIP JAR
-      </div>
-
-      <div className="text-center" style={{ fontFamily: 'var(--font-pixel)', color: '#fff', fontSize: 14 }}>
-        {fmtIDR(total)}
-      </div>
-
-      <div className="w-48">
-        <ProgressBar pct={pct} color={coinColor} />
-        <div className="flex justify-between mt-1" style={{ fontFamily: 'var(--font-pixel)', fontSize: 7, color: '#666' }}>
-          <span>{fmtIDR(total)}</span>
-          <span>{fmtIDR(goal)}</span>
-        </div>
-      </div>
-
-      {toast && (
-        <div
-          key={toast.id}
-          className="ptj-toast-in ptj-anim px-3 py-2 rounded-lg text-center"
-          style={{
-            background: 'rgba(0,0,0,0.85)',
-            border: `1px solid ${coinColor}40`,
-            maxWidth: 220,
-            animationDuration: '0.3s',
-          }}
-        >
-          <div style={{ fontFamily: 'var(--font-pixel)', fontSize: 9, color: coinColor }}>
-            {toast.name} · {fmtIDR(toast.amount)}
+    <div
+      className={shake ? 'ptj-shake ptj-anim' : ''}
+      style={{ animationDuration: shake ? '450ms' : undefined }}
+    >
+      <div className="flex flex-col items-center gap-3" style={{ minHeight: standalone ? '100vh' : undefined, transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+        {topSupporter && (
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+            style={{ background: 'rgba(0,0,0,0.5)', border: `1px solid ${coinColor}40`, fontFamily: 'var(--font-pixel)', fontSize: 8, color: coinColor }}
+          >
+            <span>👑</span>
+            <span>{topSupporter.name}</span>
+            <span style={{ color: '#888' }}>· {fmtIDR(topSupporter.total)}</span>
           </div>
-          {toast.message && (
-            <div className="text-zinc-400 text-xs mt-1 truncate" style={{ maxWidth: 200 }}>
-              {toast.message}
-            </div>
-          )}
+        )}
+
+        <div className="relative">
+          {showConfetti && <Confetti color={coinColor} burst={confettiBurst} />}
+          <div className="w-48 relative">
+            <PixelJar coins={coins} coinColor={coinColor} flash={flash} glow={pct} />
+            {flyingCoin && <FlyingCoin key={flyingCoin.id} id={flyingCoin.id} color={coinColor} />}
+          </div>
         </div>
-      )}
+
+        <div className="text-center" style={{ fontFamily: 'var(--font-pixel)', color: coinColor, fontSize: 11, letterSpacing: 1 }}>
+          TIP JAR
+        </div>
+
+        <div className="text-center" style={{ fontFamily: 'var(--font-pixel)', color: '#fff', fontSize: 14 }}>
+          {fmtIDR(total)}
+        </div>
+
+        <div className="w-48">
+          <ProgressBar pct={pct} color={coinColor} />
+          <div className="flex justify-between mt-1" style={{ fontFamily: 'var(--font-pixel)', fontSize: 7, color: '#666' }}>
+            <span>{fmtIDR(total)}</span>
+            <span>{fmtIDR(goal)}</span>
+          </div>
+        </div>
+
+        {milestone && (
+          <div
+            key={milestone + confettiBurst}
+            className="ptj-milestone-pop ptj-anim px-3 py-1.5 rounded-lg"
+            style={{
+              background: `${coinColor}20`,
+              border: `1px solid ${coinColor}`,
+              fontFamily: 'var(--font-pixel)',
+              fontSize: 9,
+              color: coinColor,
+              animationDuration: '2.4s',
+            }}
+          >
+            {milestone}
+          </div>
+        )}
+
+        {toast && (
+          <div
+            key={toast.id}
+            className="ptj-toast-in ptj-anim px-3 py-2 rounded-lg text-center relative"
+            style={{
+              background: 'rgba(0,0,0,0.85)',
+              border: `1px solid ${coinColor}40`,
+              maxWidth: 220,
+              animationDuration: '0.3s',
+            }}
+          >
+            {combo > 1 && (
+              <div
+                className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full"
+                style={{ background: coinColor, color: '#000', fontFamily: 'var(--font-pixel)', fontSize: 7 }}
+              >
+                x{combo}
+              </div>
+            )}
+            <div style={{ fontFamily: 'var(--font-pixel)', fontSize: 9, color: coinColor }}>
+              {toast.name} · {fmtIDR(toast.amount)}
+            </div>
+            {toast.message && (
+              <div className="text-zinc-400 text-xs mt-1 truncate" style={{ maxWidth: 200 }}>
+                {toast.message}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 
