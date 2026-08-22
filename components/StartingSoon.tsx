@@ -75,7 +75,7 @@ export function StartingSoon() {
         {text}
       </div>
       {sub && (
-        <div className="font-mono text-xs tracking-widest uppercase" style={{ color: accent, opacity: 0.9 }}>
+        <div className="font-mono text-xs tracking-widest uppercase" style={{ color: textColor, opacity: 0.7 }}>
           {sub}
         </div>
       )}
