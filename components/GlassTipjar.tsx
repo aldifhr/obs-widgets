@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -6,10 +6,6 @@ import { SectionTitle } from '../lib/platforms'
 import { useTakoEvents } from '../lib/tako'
 import type { TakoEvent } from '../lib/tako'
 
-const COIN_COLS = [31, 40, 49, 58]
-const COIN_W = 6
-const ROW_H = 6
-const BASE_Y = 89
 const MAX_COINS = 40
 const MILESTONES = [0.25, 0.5, 0.75, 1]
 
@@ -42,97 +38,53 @@ const GIFT_IMAGES: Record<string, string> = {
 }
 const DEFAULT_GIFT_IMG = 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eba3a9bb85c33e017f3648eaf88d7189~tplv-obj.webp'
 
-function coinSlot(i: number) {
-  const col = i % 4
-  const row = Math.floor(i / 4)
-  const x = COIN_COLS[col] + (row % 2 === 1 ? 1 : 0)
-  const y = BASE_Y - row * ROW_H
-  return { x, y, col, row }
-}
-
-function PixelCoin({ x, y, color, drop, delay }: { x: number; y: number; color: string; drop?: boolean; delay?: number }) {
-  const shade = useMemo(() => {
-    const r = parseInt(color.slice(1, 3), 16)
-    const g = parseInt(color.slice(3, 5), 16)
-    const b = parseInt(color.slice(5, 7), 16)
-    return `rgb(${Math.max(0, r - 50)},${Math.max(0, g - 50)},${Math.max(0, b - 20)})`
-  }, [color])
-
+function GlassJarSvg({ pct, liquidColor, flash }: { pct: number; liquidColor: string; flash: boolean }) {
   return (
-    <g transform={`translate(${x}, ${y})`}>
-      <g
-        className={drop ? 'ptj-coin-drop ptj-anim' : ''}
-        style={drop ? { animationDuration: '0.8s', animationDelay: `${delay || 0}ms`, animationFillMode: 'both' } : undefined}
-      >
-        <rect x={1} y={0} width={4} height={1} fill={color} />
-        <rect x={0} y={1} width={COIN_W} height={3} fill={color} />
-        <rect x={1} y={4} width={4} height={1} fill={shade} />
-        <rect x={0} y={3} width={COIN_W} height={2} fill={shade} />
-        <rect x={1} y={1} width={2} height={1} fill="rgba(255,255,255,0.3)" />
-      </g>
-    </g>
-  )
-}
-
-// Coin that arcs from above the lid down into the jar mouth whenever a tip lands.
-function FlyingCoin({ color, id }: { color: string; id: string }) {
-  return (
-    <svg viewBox="0 0 96 112" className="absolute inset-0 w-full h-full pointer-events-none" style={{ imageRendering: 'pixelated' }}>
-      <g key={id} className="ptj-coin-fly ptj-anim" style={{ animationDuration: '0.65s', animationFillMode: 'both' }}>
-        <rect x={-3} y={-1} width={6} height={6} fill={color} />
-        <rect x={-2} y={0} width={4} height={1} fill="rgba(255,255,255,0.5)" />
-      </g>
-    </svg>
-  )
-}
-
-function PixelJar({ coinItems, coinColor, flash, glow }: { coinItems: { source: string }[]; coinColor: string; flash: boolean; glow: number }) {
-  const slots = useMemo(() => {
-    const s = []
-    for (let i = 0; i < Math.min(coinItems.length, MAX_COINS); i++) s.push({ ...coinSlot(i), source: coinItems[i].source })
-    return s
-  }, [coinItems])
-
-  const glowOpacity = 0.2 + glow * 0.35
-  const tiktokColor = '#FF6B6B'
-
-  return (
-    <svg viewBox="0 0 96 112" className="w-full h-auto" style={{ imageRendering: 'pixelated' }}>
+    <svg viewBox="0 0 140 190" className="w-full h-auto" style={{ maxWidth: 160 }}>
       <defs>
-        <clipPath id="ptj-jar-clip">
-          <rect x={27} y={22} width={42} height={72} />
-        </clipPath>
+        <clipPath id="gj-clip"><rect x={8} y={32} width={124} height={148} rx={14} /></clipPath>
+        <linearGradient id="gj-liquid" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stopColor={liquidColor} />
+          <stop offset="100%" stopColor={`${liquidColor}cc`} />
+        </linearGradient>
       </defs>
-
-      {/* lid */}
-      <rect x={28} y={10} width={40} height={8} fill="#A9744B" />
-      <rect x={28} y={12} width={40} height={6} fill="#8B5E3C" />
-      <rect x={28} y={16} width={40} height={2} fill="#5C3A21" />
-      <rect x={42} y={13} width={12} height={3} fill="#3A2417" />
-
-      {/* jar body — subtle glow rises with fill progress, flares on flash */}
-      <rect
-        x={24} y={18} width={48} height={78} rx={3}
-        fill="rgba(155,232,222,0.07)"
-        stroke={flash ? coinColor : `rgba(155,232,222,${glowOpacity})`}
-        strokeWidth={flash ? 2 : 1.5}
-        style={{ filter: flash ? `drop-shadow(0 0 6px ${coinColor})` : glow > 0.5 ? `drop-shadow(0 0 3px ${coinColor}40)` : undefined }}
-      />
-
-      {/* highlight */}
-      <rect x={28} y={22} width={3} height={70} fill="rgba(255,255,255,0.06)" />
-      <rect x={32} y={22} width={2} height={14} fill="rgba(255,255,255,0.04)" />
-
-      {/* base shadow */}
-      <rect x={26} y={92} width={44} height={4} fill="rgba(0,0,0,0.15)" />
-
-      {/* coins */}
-      <g clipPath="url(#ptj-jar-clip)">
-        {slots.map((s, i) => (
-          <PixelCoin key={i} x={s.x} y={s.y} color={s.source === 'tiktok' ? tiktokColor : coinColor} />
-        ))}
+      <rect x={22} y={8} width={96} height={16} rx={6} fill="#B08655" />
+      <rect x={22} y={18} width={96} height={4} fill="#8a6640" />
+      <rect x={6} y={22} width={128} height={160} rx={16} fill="rgba(255,255,255,0.3)" stroke="rgba(58,37,64,0.2)" strokeWidth={2.5}
+        style={{ filter: flash ? `drop-shadow(0 0 12px ${liquidColor})` : 'drop-shadow(0 18px 30px -12px rgba(58,37,64,0.15))' }} />
+      <g clipPath="url(#gj-clip)">
+        <rect x={8} y={32 + 148 * (1 - pct)} width={124} height={148 * pct} fill="url(#gj-liquid)"
+          style={{ transition: 'height 0.9s cubic-bezier(.22,.9,.3,1), y 0.9s cubic-bezier(.22,.9,.3,1)' }} />
+        {pct > 0.02 && (
+          <ellipse cx={70} cy={32 + 148 * (1 - pct)} rx={64} ry={6} fill={liquidColor} opacity={0.5}>
+            <animate attributeName="cy" values={`${32 + 148 * (1 - pct)};${29 + 148 * (1 - pct)};${32 + 148 * (1 - pct)}`} dur="3.2s" repeatCount="indefinite" />
+          </ellipse>
+        )}
       </g>
+      <rect x={16} y={30} width={8} height={120} rx={4} fill="rgba(255,255,255,0.35)" />
+      <rect x={28} y={30} width={4} height={40} rx={2} fill="rgba(255,255,255,0.2)" />
     </svg>
+  )
+}
+
+function CoinDrop({ color, id }: { color: string; id: string }) {
+  return (
+    <div
+      key={id}
+      className="absolute gj-coin-drop gj-anim"
+      style={{
+        left: '50%',
+        top: '0%',
+        width: 14,
+        height: 14,
+        borderRadius: '50%',
+        background: `radial-gradient(circle at 35% 35%, ${color}, ${color}aa)`,
+        boxShadow: `0 0 6px ${color}60`,
+        transform: 'translateX(-50%)',
+        animationDuration: '0.65s',
+        animationFillMode: 'both',
+      }}
+    />
   )
 }
 
@@ -168,7 +120,6 @@ function Confetti({ color, burst }: { color: string; burst: number }) {
       color: colors[i % colors.length],
       delay: Math.random() * 200,
     }))
-    // burst forces a fresh particle set each time a milestone fires
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [color, burst])
 
@@ -177,10 +128,10 @@ function Confetti({ color, burst }: { color: string; burst: number }) {
       {particles.map(p => (
         <div
           key={p.id}
-          className="absolute ptj-confetti ptj-anim"
+          className="absolute gj-confetti gj-anim"
           style={{
-            left: `${(p.x / 96) * 100}%`,
-            top: `${(p.y / 112) * 100}%`,
+            left: `${(p.x / 140) * 100}%`,
+            top: `${(p.y / 190) * 100}%`,
             width: p.size,
             height: p.size,
             background: p.color,
@@ -201,7 +152,7 @@ function fmtIDR(n: number) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n)
 }
 
-export function PixelTipjarCustomizer() {
+export function GlassJar() {
   const searchParams = useSearchParams()
   const showWidget = searchParams.has('hide')
 
@@ -218,7 +169,7 @@ export function PixelTipjarCustomizer() {
     const v = Number(searchParams.get('goal'))
     return v > 0 ? v : 500000
   })
-  const [coinColor, setCoinColor] = useState(searchParams.get('coin') || '#FFC53D')
+  const [liquidColor, setLiquidColor] = useState(searchParams.get('liquid') || '#FFC53D')
   const [bgColor, setBgColor] = useState(searchParams.get('bg') || 'transparent')
   const [scale, setScale] = useState(() => {
     const v = Number(searchParams.get('scale'))
@@ -231,7 +182,6 @@ export function PixelTipjarCustomizer() {
   const [copied, setCopied] = useState(false)
 
   const [total, setTotal] = useState(0)
-  const [coinItems, setCoinItems] = useState<{ source: string }[]>([])
   const [toast, setToast] = useState<{ name: string; amount: number; message: string; id: string } | null>(null)
   const [flash, setFlash] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
@@ -239,7 +189,7 @@ export function PixelTipjarCustomizer() {
   const [milestone, setMilestone] = useState<string | null>(null)
   const [combo, setCombo] = useState(1)
   const [shake, setShake] = useState(false)
-  const [flyingCoin, setFlyingCoin] = useState<{ id: string } | null>(null)
+  const [coinDrops, setCoinDrops] = useState<{ id: string; color: string }[]>([])
   const [topSupporter, setTopSupporter] = useState<{ name: string; total: number } | null>(null)
   const [likeCount, setLikeCount] = useState(0)
   const [hearts, setHearts] = useState<{ id: string; x: number }[]>([])
@@ -286,28 +236,30 @@ export function PixelTipjarCustomizer() {
     }
     if (e.kind !== 'tip') return
     setTotal(t => t + e.amount)
-    setCoinItems(coins => [...coins, ...Array.from({ length: Math.max(1, Math.round(e.amount / 5000)) }, () => ({ source: 'tako' }))].slice(-MAX_COINS))
+
+    const dropCount = Math.max(1, Math.round(e.amount / 5000))
+    const newDrops = Array.from({ length: dropCount }, (_, i) => ({
+      id: e.id + '-drop-' + Date.now() + '-' + i,
+      color: liquidColor,
+    }))
+    setCoinDrops(drops => [...drops, ...newDrops].slice(-MAX_COINS))
+    setTimeout(() => {
+      setCoinDrops(drops => drops.filter(d => !newDrops.some(nd => nd.id === d.id)))
+    }, 800)
+
     setFlash(true)
     setTimeout(() => setFlash(false), 600)
 
-    // combo streak — consecutive tips within 8s bump the multiplier
     const now = Date.now()
     const isStreak = now - lastTipAt.current < 8000
     lastTipAt.current = now
     setCombo(c => (isStreak ? Math.min(c + 1, 9) : 1))
 
-    // top supporter tracking
     const prevTotal = supporterTotals.current.get(e.name) || 0
     const nextTotal = prevTotal + e.amount
     supporterTotals.current.set(e.name, nextTotal)
     setTopSupporter(cur => (!cur || nextTotal > cur.total ? { name: e.name, total: nextTotal } : cur))
 
-    // flying coin arc into the jar
-    const flyId = e.id + '-fly-' + now
-    setFlyingCoin({ id: flyId })
-    setTimeout(() => setFlyingCoin(f => (f?.id === flyId ? null : f)), 700)
-
-    // big-tip screen shake for extra juice
     if (e.amount >= Math.max(goal * 0.1, 50000)) {
       setShake(true)
       setTimeout(() => setShake(false), 450)
@@ -316,7 +268,7 @@ export function PixelTipjarCustomizer() {
     setToast({ name: e.name, amount: e.amount, message: e.message, id: e.id + '-' + now })
     clearTimeout(toastTimer.current)
     toastTimer.current = window.setTimeout(() => setToast(null), toastDur)
-  }, [toastDur, goal])
+  }, [toastDur, goal, liquidColor])
 
   const handleFakeTip = useCallback(() => {
     const amounts = [5000, 10000, 15000, 25000, 50000, 100000]
@@ -335,11 +287,33 @@ export function PixelTipjarCustomizer() {
     })
   }, [handleEvent])
 
+  const handleFakeLike = useCallback(() => {
+    handleEvent({
+      kind: 'like',
+      user: 'TikTokUser',
+      count: 1,
+      at: Date.now(),
+    })
+  }, [handleEvent])
+
+  const handleFakeGift = useCallback(() => {
+    const giftNames = Object.keys(GIFT_IMAGES)
+    const name = giftNames[Math.floor(Math.random() * giftNames.length)]
+    handleEvent({
+      kind: 'gift',
+      id: 'gift-test-' + Date.now(),
+      user: 'TikTokUser',
+      giftName: name,
+      diamondCount: 5 + Math.floor(Math.random() * 95),
+      repeatCount: 1,
+      at: Date.now(),
+    })
+  }, [handleEvent])
+
   const status = useTakoEvents(server, handleEvent)
 
   const pct = Math.min(total / goal, 1)
 
-  // milestone watcher — fires once per threshold, resets when goal changes
   useEffect(() => {
     for (const t of MILESTONES) {
       if (pct >= t && !milestonesHit.current.has(t)) {
@@ -355,7 +329,7 @@ export function PixelTipjarCustomizer() {
   }, [goal])
 
   const widgetParams = new URLSearchParams({
-    server, goal: String(goal), coin: coinColor, bg: bgColor,
+    server, goal: String(goal), liquid: liquidColor, bg: bgColor,
     scale: String(scale), toast: String(toastDur), hide: '1',
   })
   const [widgetUrl, setWidgetUrl] = useState('')
@@ -364,30 +338,32 @@ export function PixelTipjarCustomizer() {
 
   const Widget = ({ standalone }: { standalone?: boolean }) => (
     <div
-      className={shake ? 'ptj-shake ptj-anim' : ''}
+      className={shake ? 'gj-shake gj-anim' : ''}
       style={{ animationDuration: shake ? '450ms' : undefined }}
     >
       <div className="flex flex-col items-center gap-3" style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
         {topSupporter && (
           <div
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-            style={{ background: 'rgba(0,0,0,0.5)', border: `1px solid ${coinColor}40`, fontFamily: 'var(--font-pixel)', fontSize: 8, color: coinColor }}
+            style={{ background: 'rgba(0,0,0,0.5)', border: `1px solid ${liquidColor}40`, fontFamily: "'Fraunces', serif", fontSize: 11, color: liquidColor }}
           >
-            <span>👑</span>
+            <span>{'\u{1F451}'}</span>
             <span>{topSupporter.name}</span>
             <span style={{ color: '#888' }}>· {fmtIDR(topSupporter.total)}</span>
           </div>
         )}
 
         <div className="relative">
-          {showConfetti && <Confetti color={coinColor} burst={confettiBurst} />}
+          {showConfetti && <Confetti color={liquidColor} burst={confettiBurst} />}
           <div className="w-48 relative">
-            <PixelJar coinItems={coinItems} coinColor={coinColor} flash={flash} glow={pct} />
-            {flyingCoin && <FlyingCoin key={flyingCoin.id} id={flyingCoin.id} color={coinColor} />}
+            <GlassJarSvg pct={pct} liquidColor={liquidColor} flash={flash} />
+            {coinDrops.map(d => (
+              <CoinDrop key={d.id} id={d.id} color={d.color} />
+            ))}
             {hearts.map(h => (
               <div
                 key={h.id}
-                className="absolute ptj-heart-float ptj-anim"
+                className="absolute gj-heart-float gj-anim"
                 style={{
                   left: `${h.x}%`,
                   bottom: '80%',
@@ -401,7 +377,7 @@ export function PixelTipjarCustomizer() {
             {floatingGifts.map(g => (
               <div
                 key={g.id}
-                className="absolute ptj-heart-float ptj-anim"
+                className="absolute gj-heart-float gj-anim"
                 style={{
                   left: `${g.x}%`,
                   bottom: '80%',
@@ -415,24 +391,24 @@ export function PixelTipjarCustomizer() {
           </div>
         </div>
 
-        <div className="text-center" style={{ fontFamily: 'var(--font-pixel)', color: coinColor, fontSize: 11, letterSpacing: 1 }}>
-          TIP JAR
+        <div className="text-center" style={{ fontFamily: "'Fraunces', serif", color: liquidColor, fontSize: 11, letterSpacing: 1 }}>
+          TOPLES DUKUNGAN
         </div>
 
         {likeCount > 0 && (
-          <div className="flex items-center gap-1.5" style={{ fontFamily: 'var(--font-pixel)', fontSize: 10, color: '#FF6B6B' }}>
-            <span>❤️</span>
+          <div className="flex items-center gap-1.5" style={{ fontFamily: "'Fraunces', serif", fontSize: 10, color: '#FF6B6B' }}>
+            <span>{'\u2764\uFE0F'}</span>
             <span>{likeCount.toLocaleString()}</span>
           </div>
         )}
 
-        <div className="text-center" style={{ fontFamily: 'var(--font-pixel)', color: '#fff', fontSize: 14 }}>
+        <div className="text-center" style={{ fontFamily: "'Fraunces', serif", color: '#fff', fontSize: 14 }}>
           {fmtIDR(total)}
         </div>
 
         <div className="w-48">
-          <ProgressBar pct={pct} color={coinColor} />
-          <div className="flex justify-between mt-1" style={{ fontFamily: 'var(--font-pixel)', fontSize: 7, color: '#666' }}>
+          <ProgressBar pct={pct} color={liquidColor} />
+          <div className="flex justify-between mt-1" style={{ fontFamily: "'Fraunces', serif", fontSize: 7, color: '#666' }}>
             <span>{fmtIDR(total)}</span>
             <span>{fmtIDR(goal)}</span>
           </div>
@@ -441,13 +417,13 @@ export function PixelTipjarCustomizer() {
         {milestone && (
           <div
             key={milestone + confettiBurst}
-            className="ptj-milestone-pop ptj-anim px-3 py-1.5 rounded-lg"
+            className="gj-milestone-pop gj-anim px-3 py-1.5 rounded-lg"
             style={{
-              background: `${coinColor}20`,
-              border: `1px solid ${coinColor}`,
-              fontFamily: 'var(--font-pixel)',
+              background: `${liquidColor}20`,
+              border: `1px solid ${liquidColor}`,
+              fontFamily: "'Fraunces', serif",
               fontSize: 9,
-              color: coinColor,
+              color: liquidColor,
               animationDuration: '2.4s',
             }}
           >
@@ -458,23 +434,28 @@ export function PixelTipjarCustomizer() {
         {toast && (
           <div
             key={toast.id}
-            className="ptj-toast-in ptj-anim px-3 py-2 rounded-lg text-center relative"
+            className="gj-toast-bar gj-anim"
             style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
               background: 'rgba(0,0,0,0.85)',
-              border: `1px solid ${coinColor}40`,
-              maxWidth: 220,
+              borderTop: `1px solid ${liquidColor}40`,
+              padding: '8px 12px',
+              borderRadius: '0 0 12px 12px',
               animationDuration: '0.3s',
             }}
           >
             {combo > 1 && (
               <div
                 className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full"
-                style={{ background: coinColor, color: '#000', fontFamily: 'var(--font-pixel)', fontSize: 7 }}
+                style={{ background: liquidColor, color: '#000', fontFamily: "'Fraunces', serif", fontSize: 7 }}
               >
                 x{combo}
               </div>
             )}
-            <div style={{ fontFamily: 'var(--font-pixel)', fontSize: 9, color: coinColor }}>
+            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 9, color: liquidColor }}>
               {toast.name} · {fmtIDR(toast.amount)}
             </div>
             {toast.message && (
@@ -491,7 +472,7 @@ export function PixelTipjarCustomizer() {
   if (showWidget) {
     return (
       <div className="flex items-center justify-center p-6" style={{ background: bgColor === 'transparent' ? undefined : bgColor, minHeight: '100vh' }}>
-        <div className="rounded-2xl p-6" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', border: `1px solid ${coinColor}20` }}>
+        <div className="rounded-2xl p-6 relative" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', border: `1px solid ${liquidColor}20` }}>
           <Widget standalone />
         </div>
       </div>
@@ -508,11 +489,11 @@ export function PixelTipjarCustomizer() {
         <div className="w-full lg:w-[380px] bg-studio-900 border-l border-studio-border flex flex-col">
           <div className="p-6 border-b border-studio-border">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${coinColor}15`, color: coinColor }}>
-                <span style={{ fontFamily: 'var(--font-pixel)', fontSize: 14 }}>$</span>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${liquidColor}15`, color: liquidColor }}>
+                <span style={{ fontFamily: "'Fraunces', serif", fontSize: 14 }}>{'\u{1F48E}'}</span>
               </div>
               <div>
-                <h2 className="text-white font-display text-lg font-semibold leading-tight">Pixel Tipjar</h2>
+                <h2 className="text-white font-display text-lg font-semibold leading-tight">Glass Tipjar</h2>
                 <p className="text-zinc-500 text-xs font-mono">tako.id webhook</p>
               </div>
             </div>
@@ -545,20 +526,20 @@ export function PixelTipjarCustomizer() {
 
             <section>
               <SectionTitle>Scale <span className="text-zinc-600 font-mono font-normal ml-1">{scale.toFixed(1)}x</span></SectionTitle>
-              <input type="range" min="0.5" max="2" step="0.1" value={scale} onChange={e => setScale(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: coinColor }} />
+              <input type="range" min="0.5" max="2" step="0.1" value={scale} onChange={e => setScale(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: liquidColor }} />
             </section>
 
             <section>
               <SectionTitle>Toast Duration <span className="text-zinc-600 font-mono font-normal ml-1">{(toastDur / 1000).toFixed(1)}s</span></SectionTitle>
-              <input type="range" min="2000" max="10000" step="500" value={toastDur} onChange={e => setToastDur(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: coinColor }} />
+              <input type="range" min="2000" max="10000" step="500" value={toastDur} onChange={e => setToastDur(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: liquidColor }} />
             </section>
 
             <section>
               <SectionTitle>Colors</SectionTitle>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-zinc-500 text-[11px] block mb-1.5">Coin</label>
-                  <div className="relative"><div className="absolute inset-0 rounded-xl border border-studio-border" style={{ background: coinColor }} /><input type="color" value={coinColor} onChange={e => setCoinColor(e.target.value)} className="relative w-full h-10 rounded-xl cursor-pointer bg-transparent border-0" /></div>
+                  <label className="text-zinc-500 text-[11px] block mb-1.5">Liquid</label>
+                  <div className="relative"><div className="absolute inset-0 rounded-xl border border-studio-border" style={{ background: liquidColor }} /><input type="color" value={liquidColor} onChange={e => setLiquidColor(e.target.value)} className="relative w-full h-10 rounded-xl cursor-pointer bg-transparent border-0" /></div>
                 </div>
                 <div>
                   <label className="text-zinc-500 text-[11px] block mb-1.5">Background</label>
@@ -568,14 +549,23 @@ export function PixelTipjarCustomizer() {
             </section>
 
             <section>
-              <button onClick={handleFakeTip} className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] border border-studio-border bg-studio-800/50 text-zinc-300 hover:bg-studio-800 hover:text-white hover:border-white/15">
-                Test Tip
-              </button>
+              <SectionTitle>Test</SectionTitle>
+              <div className="flex gap-2">
+                <button onClick={handleFakeTip} className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] border border-studio-border bg-studio-800/50 text-zinc-300 hover:bg-studio-800 hover:text-white hover:border-white/15">
+                  Tip
+                </button>
+                <button onClick={handleFakeLike} className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] border border-studio-border bg-studio-800/50 text-zinc-300 hover:bg-studio-800 hover:text-white hover:border-white/15">
+                  Like
+                </button>
+                <button onClick={handleFakeGift} className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] border border-studio-border bg-studio-800/50 text-zinc-300 hover:bg-studio-800 hover:text-white hover:border-white/15">
+                  Gift
+                </button>
+              </div>
             </section>
           </div>
 
           <div className="p-6 border-t border-studio-border">
-            <button onClick={copyUrl} className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] text-studio-950" style={{ background: coinColor, boxShadow: `0 4px 20px ${coinColor}30` }}>
+            <button onClick={copyUrl} className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] text-studio-950" style={{ background: liquidColor, boxShadow: `0 4px 20px ${liquidColor}30` }}>
               {copied ? 'Copied!' : 'Copy Widget URL'}
             </button>
             <p className="text-zinc-600 text-[10px] mt-3 font-mono break-all leading-relaxed">{widgetUrl}</p>
@@ -585,3 +575,5 @@ export function PixelTipjarCustomizer() {
     </div>
   )
 }
+
+export { GlassJar as GlassTipjar }

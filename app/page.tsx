@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 
 const WIDGETS = [
   { id: 'tipjar', name: 'Pixel Tipjar', desc: 'Toples pixel-art terisi koin setiap hadiah masuk lewat Tako' },
+  { id: 'glass', name: 'Glass Tipjar', desc: 'Toples kaca realistis — liquid fill, shine, & wave animation' },
   { id: 'ledger', name: 'Ledger Tipjar', desc: 'Buku tip ala struk receipt — light & dark mode' },
   { id: 'social-follow', name: 'Social Follow', desc: 'Single platform — show your handle with an animated icon' },
   { id: 'social-rotator', name: 'Social Rotator', desc: 'Cycle through multiple platforms with smooth transitions' },
