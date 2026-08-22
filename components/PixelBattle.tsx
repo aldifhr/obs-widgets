@@ -134,6 +134,8 @@ export function PixelBattle() {
   }, [])
 
   const [input, setInput] = useState('')
+  const [widgetUrl, setWidgetUrl] = useState('')
+  useEffect(() => { setWidgetUrl(`${window.location.origin}/battle?hide=1`) }, [])
   const accent = '#FFC53D'
 
   const names = ['Budi', 'Sari', 'Raka', 'Dina', 'Andi', 'Maya', 'Reza', 'Luna', 'Fajar', 'Nisa', 'Joko', 'Tika']
@@ -240,7 +242,7 @@ export function PixelBattle() {
           <div className="p-6 border-t border-studio-border">
             <div className="bg-studio-800/30 border border-studio-border rounded-xl p-3">
               <p className="text-zinc-500 text-[10px] font-mono">Widget URL (OBS Browser Source):</p>
-              <p className="text-zinc-400 text-[10px] font-mono break-all mt-1">{typeof window !== 'undefined' ? `${window.location.origin}/battle?hide=1` : ''}</p>
+              <p className="text-zinc-400 text-[10px] font-mono break-all mt-1">{widgetUrl}</p>
               <p className="text-zinc-600 text-[9px] mt-2">TikTok live chat auto spawn (via VPS tiktok-wss). Viewer leave = auto hilang.</p>
             </div>
           </div>
