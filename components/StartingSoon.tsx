@@ -32,10 +32,10 @@ export function StartingSoon() {
 
   useEffect(() => { setRemaining(countdown * 60) }, [countdown])
   useEffect(() => {
-    if (remaining <= 0 || !showWidget) return
+    if (remaining <= 0) return
     const t = setInterval(() => setRemaining(r => Math.max(0, r - 1)), 1000)
     return () => clearInterval(t)
-  }, [remaining, showWidget])
+  }, [remaining])
 
   const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 
