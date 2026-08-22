@@ -356,7 +356,7 @@ export function GlassJar() {
 
         <div className="relative">
           {showConfetti && <Confetti color={liquidColor} burst={confettiBurst} />}
-          <div className="w-48 relative">
+          <div className="w-48 relative flex justify-center">
             <GlassJarSvg pct={pct} liquidColor={liquidColor} flash={flash} />
             {coinDrops.map(d => (
               <CoinDrop key={d.id} id={d.id} color={d.color} />
