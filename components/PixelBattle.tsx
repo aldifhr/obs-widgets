@@ -40,7 +40,9 @@ export function PixelBattle() {
   const rafRef = useRef<number>(0)
 
   // spawn / remove helpers
-  const spawn = (name: string) => {
+  const spawn = (raw: string) => {
+    const name = raw.replace(/^@/, '').trim()
+    if (!name) return
     setFighters(prev => {
       if (prev.length >= MAX_FIGHTERS) return prev
       if (prev.some(f => f.name.toLowerCase() === name.toLowerCase())) return prev
@@ -138,7 +140,7 @@ export function PixelBattle() {
   useEffect(() => { setWidgetUrl(`${window.location.origin}/battle?hide=1`) }, [])
   const accent = '#FFC53D'
 
-  const names = ['Budi', 'Sari', 'Raka', 'Dina', 'Andi', 'Maya', 'Reza', 'Luna', 'Fajar', 'Nisa', 'Joko', 'Tika']
+  const names = ['pandafaa', 'Budi', 'Sari', 'Raka', 'Dina', 'Andi', 'Maya', 'Reza', 'Luna', 'Fajar', 'Nisa', 'Joko']
 
   const PixelChar = ({ f }: { f: Fighter }) => (
     <div
