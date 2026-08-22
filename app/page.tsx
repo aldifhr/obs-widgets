@@ -1,11 +1,15 @@
-export type WidgetId = 'social-follow' | 'social-rotator'
+'use client'
+
+import { useRouter } from 'next/navigation'
 
 const WIDGETS = [
-  { id: 'social-follow' as const, name: 'Social Follow', desc: 'Single platform — show your handle with an animated icon' },
-  { id: 'social-rotator' as const, name: 'Social Rotator', desc: 'Cycle through multiple platforms with smooth transitions' },
+  { id: 'tipjar', name: 'Pixel Tipjar', desc: 'Toples pixel-art terisi koin setiap hadiah masuk lewat Tako' },
+  { id: 'social-follow', name: 'Social Follow', desc: 'Single platform — show your handle with an animated icon' },
+  { id: 'social-rotator', name: 'Social Rotator', desc: 'Cycle through multiple platforms with smooth transitions' },
 ]
 
-export function Collection({ onSelect }: { onSelect: (id: WidgetId) => void }) {
+export default function HomePage() {
+  const router = useRouter()
   return (
     <div className="min-h-screen bg-studio-950 flex flex-col items-center justify-center p-8">
       <div className="max-w-2xl w-full">
@@ -16,7 +20,7 @@ export function Collection({ onSelect }: { onSelect: (id: WidgetId) => void }) {
         </div>
         <div className="grid gap-4">
           {WIDGETS.map(w => (
-            <button key={w.id} onClick={() => onSelect(w.id)} className="group w-full text-left p-5 rounded-2xl border border-studio-border bg-studio-900 hover:bg-studio-800 hover:border-white/10 transition-all duration-200">
+            <button key={w.id} onClick={() => router.push(`/${w.id}`)} className="group w-full text-left p-5 rounded-2xl border border-studio-border bg-studio-900 hover:bg-studio-800 hover:border-white/10 transition-all duration-200">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-signal/10 flex items-center justify-center flex-shrink-0">
                   <div className="w-6 h-6 rounded-full bg-signal/30 group-hover:bg-signal/50 transition-colors" />

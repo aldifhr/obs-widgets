@@ -1,10 +1,12 @@
+'use client'
+
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'next/navigation'
 import { PLATFORMS, PLATFORM_KEYS, SHAPE_MAP, toHex7, SectionTitle } from '../lib/platforms'
 import type { Platform, Transition, Shape } from '../lib/platforms'
 
 export function SocialRotatorCustomizer() {
-  const [searchParams] = useSearchParams()
+  const searchParams = useSearchParams()
   const showWidget = searchParams.has('hide')
 
   const parseList = (key: string, fallback: string[]) => {
@@ -71,7 +73,8 @@ export function SocialRotatorCustomizer() {
     interval: String(interval), transition, transDuration: String(transitionDuration), textColor,
     bg: bgColor, size: String(size), anim, shape, hide: '1',
   })
-  const widgetUrl = `${window.location.origin}/social-rotator?${widgetParams.toString()}`
+  const [widgetUrl, setWidgetUrl] = useState('')
+  useEffect(() => { setWidgetUrl(`${window.location.origin}/social-rotator?${widgetParams.toString()}`) }, [widgetParams.toString()])
   const copyUrl = () => { navigator.clipboard.writeText(widgetUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const animClass = anim === 'pulse' ? 'animate-[pulse_2s_ease-in-out_infinite]' : anim === 'bounce' ? 'animate-[bounce_1.5s_ease-in-out_infinite]' : anim === 'fade' ? 'animate-[fade_3s_ease-in-out_infinite]' : anim === 'slide' ? 'animate-[slide_2s_ease-in-out_infinite]' : ''

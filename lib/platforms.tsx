@@ -1,3 +1,5 @@
+'use client'
+
 export const PLATFORMS = {
   youtube: {
     name: 'YouTube',

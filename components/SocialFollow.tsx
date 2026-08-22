@@ -1,10 +1,12 @@
+'use client'
+
 import React, { useState, useEffect, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'next/navigation'
 import { PLATFORMS, PLATFORM_KEYS, toHex7, SectionTitle } from '../lib/platforms'
 import type { Platform } from '../lib/platforms'
 
 export function SocialFollowCustomizer() {
-  const [searchParams] = useSearchParams()
+  const searchParams = useSearchParams()
   const [platform, setPlatform] = useState<Platform>((searchParams.get('platform') as Platform) || 'youtube')
   const [handle, setHandle] = useState(searchParams.get('handle') || '@faray')
   const [color, setColor] = useState(searchParams.get('color') || PLATFORMS[platform].color)
@@ -50,7 +52,8 @@ export function SocialFollowCustomizer() {
   const widgetParams = new URLSearchParams({
     platform, handle, color, textColor, bg: bgColor, iconSize: String(iconSize), padding: String(padding), radius: String(radius), border: border ? '1' : '0', anim, hide: '1',
   })
-  const widgetUrl = `${window.location.origin}/social-follow?${widgetParams.toString()}`
+  const [widgetUrl, setWidgetUrl] = useState('')
+  useEffect(() => { setWidgetUrl(`${window.location.origin}/social-follow?${widgetParams.toString()}`) }, [widgetParams.toString()])
   const copyUrl = () => { navigator.clipboard.writeText(widgetUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const renderIcon = (icon: React.ReactNode, s: number) => {
