@@ -211,6 +211,8 @@ export function PixelTipjarCustomizer() {
   const [shake, setShake] = useState(false)
   const [flyingCoin, setFlyingCoin] = useState<{ id: string } | null>(null)
   const [topSupporter, setTopSupporter] = useState<{ name: string; total: number } | null>(null)
+  const [likeCount, setLikeCount] = useState(0)
+  const [hearts, setHearts] = useState<{ id: string; x: number }[]>([])
 
   const toastTimer = useRef<number>(0)
   const milestoneTimer = useRef<number>(0)
@@ -228,6 +230,14 @@ export function PixelTipjarCustomizer() {
   }, [])
 
   const handleEvent = useCallback((e: TakoEvent) => {
+    if (e.kind === 'like') {
+      setLikeCount(c => c + e.count)
+      const id = 'heart-' + Date.now() + '-' + Math.random()
+      const x = 20 + Math.random() * 60
+      setHearts(h => [...h.slice(-8), { id, x }])
+      setTimeout(() => setHearts(h => h.filter(h => h.id !== id)), 1500)
+      return
+    }
     if (e.kind !== 'tip') return
     setTotal(t => t + e.amount)
     setCoins(c => Math.min(c + Math.max(1, Math.round(e.amount / 5000)), MAX_COINS))
@@ -328,12 +338,34 @@ export function PixelTipjarCustomizer() {
           <div className="w-48 relative">
             <PixelJar coins={coins} coinColor={coinColor} flash={flash} glow={pct} />
             {flyingCoin && <FlyingCoin key={flyingCoin.id} id={flyingCoin.id} color={coinColor} />}
+            {hearts.map(h => (
+              <div
+                key={h.id}
+                className="absolute ptj-heart-float ptj-anim"
+                style={{
+                  left: `${h.x}%`,
+                  bottom: '80%',
+                  fontSize: 16,
+                  animationDuration: '1.5s',
+                  animationFillMode: 'forwards',
+                }}
+              >
+                ❤️
+              </div>
+            ))}
           </div>
         </div>
 
         <div className="text-center" style={{ fontFamily: 'var(--font-pixel)', color: coinColor, fontSize: 11, letterSpacing: 1 }}>
           TIP JAR
         </div>
+
+        {likeCount > 0 && (
+          <div className="flex items-center gap-1.5" style={{ fontFamily: 'var(--font-pixel)', fontSize: 10, color: '#FF6B6B' }}>
+            <span>❤️</span>
+            <span>{likeCount.toLocaleString()}</span>
+          </div>
+        )}
 
         <div className="text-center" style={{ fontFamily: 'var(--font-pixel)', color: '#fff', fontSize: 14 }}>
           {fmtIDR(total)}

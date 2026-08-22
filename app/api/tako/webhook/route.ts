@@ -47,6 +47,16 @@ export async function POST(req: Request) {
   let body: Record<string, unknown>
   try { body = JSON.parse(raw) } catch { return NextResponse.json({ error: 'bad json' }, { status: 400 }) }
 
+  if (body.event === 'like') {
+    const d = body.data as Record<string, unknown>
+    const count = (d.likeCount as number) || 1
+    const user = (d.user as string) || 'someone'
+    const ev = { id: String(++nextId), kind: 'like', user, count, at: Date.now() }
+    console.log(`[like] ${user} +${count}`)
+    broadcast(ev)
+    return NextResponse.json({ ok: true })
+  }
+
   if (body.event !== 'payment.success') {
     return NextResponse.json({ ok: true, skipped: true })
   }

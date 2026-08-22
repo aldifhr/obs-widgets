@@ -13,7 +13,14 @@ export interface TakoTip {
   at: number
 }
 
-export type TakoEvent = TakoTip
+export interface TiktokLike {
+  kind: 'like'
+  user: string
+  count: number
+  at: number
+}
+
+export type TakoEvent = TakoTip | TiktokLike
 export type TakoStatus = 'connecting' | 'open' | 'closed'
 
 export function useTakoEvents(server: string, onData?: (e: TakoEvent) => void) {

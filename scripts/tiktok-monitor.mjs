@@ -15,7 +15,6 @@ try {
 
 const USERNAME = process.env.TIKTOK_USERNAME || env.TIKTOK_USERNAME
 const API_KEY = process.env.TIKTOK_API_KEY || env.TIKTOK_API_KEY
-const LIKE_VALUE = Number(process.env.LIKE_VALUE || env.LIKE_VALUE || 1000)
 const WEBHOOK = process.env.WEBHOOK_URL || `http://localhost:${process.env.PORT || 8787}/api/tako/webhook`
 const COOLDOWN = 3000
 
@@ -24,52 +23,60 @@ if (!USERNAME || !API_KEY) {
   process.exit(1)
 }
 
-console.log(`[tiktok] Monitoring @${USERNAME} likes (Rp${LIKE_VALUE.toLocaleString('id-ID')} each)`)
+console.log(`[tiktok] Monitoring @${USERNAME} likes`)
 
-const ws = new WebSocket(`wss://api.tik.tools?uniqueId=${USERNAME}&apiKey=${API_KEY}`)
-let lastLike = 0
 let likeBuffer = 0
 let flushTimer = null
 
 function flushLikes() {
   if (likeBuffer <= 0) return
-  const total = likeBuffer * LIKE_VALUE
+  const count = likeBuffer
   likeBuffer = 0
   const body = JSON.stringify({
-    event: 'payment.success',
-    data: {
-      id: 'like-' + Date.now(),
-      status: 'success',
-      amount: total,
-      price: 0,
-      paymentMethod: 'like',
-      createdAt: new Date().toISOString(),
-      relatedGiftId: null,
-      name: 'TikTok Likes',
-      message: '',
-    },
+    event: 'like',
+    data: { count, at: Date.now() },
   })
   fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
-    .then(() => console.log(`[tiktok] ${likeBuffer || '?'} likes flushed → Rp${total.toLocaleString('id-ID')}`))
+    .then(() => console.log(`[tiktok] ❤️  ${count} likes flushed`))
     .catch(e => console.error('[tiktok] webhook error:', e.message))
 }
 
-ws.on('message', raw => {
-  try {
-    const msg = JSON.parse(raw.toString())
-    if (msg.event === 'like') {
-      const count = msg.data?.likeCount || 1
-      likeBuffer += count
-      console.log(`[tiktok] ❤️  +${count} like (buffer: ${likeBuffer})`)
-      clearTimeout(flushTimer)
-      flushTimer = setTimeout(flushLikes, COOLDOWN)
-    }
-  } catch {}
-})
+async function connect() {
+  const j = await fetch(`https://api.tik.tools/authentication/jwt?apiKey=${API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ allowed_creators: [USERNAME], expire_after: 600, max_websockets: 1 }),
+  }).then(r => r.json())
 
-ws.on('open', () => console.log('[tiktok] Connected to TikTok LIVE'))
-ws.on('close', () => console.log('[tiktok] Disconnected'))
-ws.on('error', e => console.error('[tiktok] Error:', e.message))
+  const token = j.data?.token
+  if (!token) { console.error('[tiktok] Auth failed:', j); return }
 
-process.on('SIGINT', () => { flushLikes(); ws.close(); process.exit() })
-process.on('SIGTERM', () => { flushLikes(); ws.close(); process.exit() })
+  const ws = new WebSocket(`wss://api.tik.tools?uniqueId=${USERNAME}&jwtKey=${encodeURIComponent(token)}`)
+
+  ws.on('open', () => console.log(`[tiktok] Connected to @${USERNAME}`))
+
+  ws.on('message', raw => {
+    try {
+      const msg = JSON.parse(raw.toString())
+      if (msg.event === 'like') {
+        const count = msg.data?.likeCount || 1
+        likeBuffer += count
+        console.log(`[tiktok] ❤️  +${count} (buffer: ${likeBuffer})`)
+        clearTimeout(flushTimer)
+        flushTimer = setTimeout(flushLikes, COOLDOWN)
+      }
+    } catch {}
+  })
+
+  ws.on('close', () => {
+    console.log('[tiktok] Disconnected, reconnecting in 5s...')
+    setTimeout(connect, 5000)
+  })
+
+  ws.on('error', e => console.error('[tiktok] Error:', e.message))
+}
+
+connect()
+
+process.on('SIGINT', () => { flushLikes(); process.exit() })
+process.on('SIGTERM', () => { flushLikes(); process.exit() })

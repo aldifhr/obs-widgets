@@ -53,6 +53,25 @@ export default function TestPage() {
     setLoading(false)
   }
 
+  const sendLike = async (count?: number) => {
+    const c = count || 10
+    setLoading(true)
+    setResult('sending...')
+    try {
+      const r = await fetch('/api/tako/webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'like', data: { user: 'test_user', likeCount: c, at: Date.now() } }),
+      })
+      const t = await r.text()
+      setResult(t)
+      setHistory(prev => [`❤️ test_user +${c} likes`, ...prev.slice(0, 19)])
+    } catch (e: unknown) {
+      setResult(String(e))
+    }
+    setLoading(false)
+  }
+
   const sendBatch = async () => {
     for (const p of PRESETS) {
       await send(p.name, p.amount, p.message)
@@ -88,6 +107,9 @@ export default function TestPage() {
           <div className="flex gap-2">
             <button onClick={() => send()} disabled={loading} className="flex-1 py-2.5 rounded-xl font-semibold text-sm bg-signal text-studio-950 hover:brightness-110 transition-all active:scale-[0.98] disabled:opacity-50">
               {loading ? 'Sending...' : 'Send Tip'}
+            </button>
+            <button onClick={() => sendLike(10)} disabled={loading} className="py-2.5 px-4 rounded-xl font-semibold text-sm border border-pink-500/30 bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 hover:text-pink-300 transition-all active:scale-[0.98] disabled:opacity-50">
+              ❤️ Like x10
             </button>
             <button onClick={sendBatch} disabled={loading} className="py-2.5 px-4 rounded-xl font-semibold text-sm border border-studio-border bg-studio-800/50 text-zinc-300 hover:bg-studio-800 hover:text-white hover:border-white/15 transition-all active:scale-[0.98] disabled:opacity-50">
               Batch x6
