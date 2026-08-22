@@ -16,12 +16,12 @@ export function StartingSoon() {
     }
   }, [showWidget])
 
-  const [text, setText] = useState(searchParams.get('text') || 'STREAM STARTING SOON')
-  const [sub, setSub] = useState(searchParams.get('sub') || 'stay tuned — we go live shortly')
-  const [accent, setAccent] = useState(searchParams.get('accent') || '#FFC53D')
-  const [textColor, setTextColor] = useState(searchParams.get('tc') || '#ffffff')
-  const [font, setFont] = useState(searchParams.get('font') || 'display')
-  const [anim, setAnim] = useState(searchParams.get('anim') || 'pulse')
+  const [text, setText] = useState(() => { const v = searchParams.get('text'); return v !== null ? v : 'STREAM STARTING SOON' })
+  const [sub, setSub] = useState(() => { const v = searchParams.get('sub'); return v !== null ? v : 'stay tuned — we go live shortly' })
+  const [accent, setAccent] = useState(() => { const v = searchParams.get('accent'); return v !== null ? v : '#FFC53D' })
+  const [textColor, setTextColor] = useState(() => { const v = searchParams.get('tc'); return v !== null ? v : '#ffffff' })
+  const [font, setFont] = useState(() => { const v = searchParams.get('font'); return v !== null ? v : 'display' })
+  const [anim, setAnim] = useState(() => { const v = searchParams.get('anim'); return v !== null ? v : 'pulse' })
   const [size, setSize] = useState(() => { const v = Number(searchParams.get('size')); return v > 0 ? v : 1 })
   const [noBg, setNoBg] = useState(searchParams.has('nobg'))
   const [countdown, setCountdown] = useState(() => {
