@@ -35,10 +35,12 @@ export function LedgerTipjar() {
   const searchParams = useSearchParams()
   const showWidget = searchParams.has('hide')
   const [mode, setMode] = useState<'light' | 'dark'>((searchParams.get('mode') as 'light' | 'dark') || 'light')
+  const [server, setServer] = useState(searchParams.get('server') || '')
   const [goal, setGoal] = useState(() => { const v = Number(searchParams.get('goal')); return v > 0 ? v : 500000 })
+  const apiUrl = server ? `${server.replace(/\/$/, '')}/ledger` : '/api/ledger'
   const [copied, setCopied] = useState(false)
-  const [total, setTotal] = useState(() => { const v = localStorage.getItem('ledger-total'); return v ? Number(v) : 0 })
-  const [rows, setRows] = useState<LedgerRow[]>(() => { const v = localStorage.getItem('ledger-rows'); return v ? JSON.parse(v) : [] })
+  const [total, setTotal] = useState(0)
+  const [rows, setRows] = useState<LedgerRow[]>([])
   const [toast, setToast] = useState<{ name: string; amount: number } | null>(null)
   const [pulse, setPulse] = useState(false)
   const [newRow, setNewRow] = useState<number | null>(null)
@@ -53,6 +55,13 @@ export function LedgerTipjar() {
       document.body.style.minHeight = '100vh'
     }
   }, [showWidget])
+
+  useEffect(() => {
+    fetch(apiUrl).then(r => r.json()).then((data: LedgerRow[]) => {
+      setRows(data)
+      setTotal(data.reduce((s, r) => s + r.amount, 0))
+    }).catch(() => {})
+  }, [apiUrl])
 
   const handleEvent = useCallback((e: TakoEvent) => {
     if (e.kind !== 'tip') return
@@ -81,15 +90,7 @@ export function LedgerTipjar() {
   const pct = Math.min(total / goal, 1)
   const reached = pct >= 1
 
-  useEffect(() => {
-    localStorage.setItem('ledger-total', String(total))
-  }, [total])
-
-  useEffect(() => {
-    localStorage.setItem('ledger-rows', JSON.stringify(rows))
-  }, [rows])
-
-  const widgetParams = new URLSearchParams({ goal: String(goal), mode, hide: '1' })
+  const widgetParams = new URLSearchParams({ goal: String(goal), mode, server, hide: '1' })
   const [widgetUrl, setWidgetUrl] = useState('')
   useEffect(() => { setWidgetUrl(`${window.location.origin}/ledger?${widgetParams.toString()}`) }, [widgetParams.toString()])
   const copyUrl = () => { navigator.clipboard.writeText(widgetUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
@@ -157,6 +158,11 @@ export function LedgerTipjar() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <section>
+              <SectionTitle>Server</SectionTitle>
+              <input value={server} onChange={e => setServer(e.target.value)} className="w-full bg-studio-800/50 border border-studio-border rounded-xl px-3 py-2.5 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-white/20 transition-colors font-mono text-xs" placeholder="http://localhost:8788 (default)" />
+            </section>
+
             <section>
               <SectionTitle>Mode</SectionTitle>
               <div className="flex gap-2">
