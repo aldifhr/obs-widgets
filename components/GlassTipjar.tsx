@@ -262,96 +262,88 @@ export function GlassJar() {
   const copyUrl = () => { navigator.clipboard.writeText(widgetUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const Widget = ({ standalone }: { standalone?: boolean }) => (
-    <div
-      className={shake ? 'gj-shake gj-anim' : ''}
-      style={{ animationDuration: shake ? '450ms' : undefined }}
-    >
-      <div className="flex flex-col items-center gap-3" style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
-        {topSupporter && (
-          <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-            style={{ background: 'rgba(0,0,0,0.5)', border: `1px solid ${liquidColor}40`, fontFamily: "'Fraunces', serif", fontSize: 11, color: liquidColor }}
-          >
-            <span>{'\u{1F451}'}</span>
-            <span>{topSupporter.name}</span>
-            <span style={{ color: '#888' }}>· {fmtIDR(topSupporter.total)}</span>
-          </div>
-        )}
-
-        <div className="relative">
-          {showConfetti && <Confetti color={liquidColor} burst={confettiBurst} />}
-          <div className="w-48 relative flex justify-center">
-            <GlassJarSvg pct={pct} liquidColor={liquidColor} flash={flash} />
-            {coinDrops.map(d => (
-              <CoinDrop key={d.id} id={d.id} color={d.color} />
-            ))}
-          </div>
-        </div>
-
-        <div className="text-center" style={{ fontFamily: "'Fraunces', serif", color: '#fff', fontSize: 14 }}>
-          {fmtIDR(total)}
-        </div>
-
-        <div className="w-48">
-          <ProgressBar pct={pct} color={liquidColor} />
-          <div className="flex justify-between mt-1" style={{ fontFamily: "'Fraunces', serif", fontSize: 7, color: '#666' }}>
-            <span>{fmtIDR(total)}</span>
-            <span>{fmtIDR(goal)}</span>
-          </div>
-        </div>
-
-        {milestone && (
-          <div
-            key={milestone + confettiBurst}
-            className="gj-milestone-pop gj-anim px-3 py-1.5 rounded-lg"
-            style={{
-              background: `${liquidColor}20`,
-              border: `1px solid ${liquidColor}`,
-              fontFamily: "'Fraunces', serif",
-              fontSize: 9,
-              color: liquidColor,
-              animationDuration: '2.4s',
-            }}
-          >
-            {milestone}
-          </div>
-        )}
-
-        {toast && (
-          <div
-            key={toast.id}
-            className="gj-toast-bar gj-anim"
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              background: 'rgba(0,0,0,0.85)',
-              borderTop: `1px solid ${liquidColor}40`,
-              padding: '8px 12px',
-              borderRadius: '0 0 12px 12px',
-              animationDuration: '0.3s',
-            }}
-          >
-            {combo > 1 && (
-              <div
-                className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full"
-                style={{ background: liquidColor, color: '#000', fontFamily: "'Fraunces', serif", fontSize: 7 }}
-              >
-                x{combo}
-              </div>
-            )}
-            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 9, color: liquidColor }}>
-              {toast.name} · {fmtIDR(toast.amount)}
+    <div className="relative">
+      <div
+        className={shake ? 'gj-shake gj-anim' : ''}
+        style={{ animationDuration: shake ? '450ms' : undefined }}
+      >
+        <div className="flex flex-col items-center gap-3" style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+          {topSupporter && (
+            <div
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+              style={{ background: 'rgba(0,0,0,0.5)', border: `1px solid ${liquidColor}40`, fontFamily: "'Fraunces', serif", fontSize: 11, color: liquidColor }}
+            >
+              <span>{'\u{1F451}'}</span>
+              <span>{topSupporter.name}</span>
+              <span style={{ color: '#888' }}>· {fmtIDR(topSupporter.total)}</span>
             </div>
-            {toast.message && (
-              <div className="text-zinc-400 text-xs mt-1 truncate" style={{ maxWidth: 200 }}>
-                {toast.message}
-              </div>
-            )}
+          )}
+
+          <div className="relative">
+            {showConfetti && <Confetti color={liquidColor} burst={confettiBurst} />}
+            <div className="w-48 relative flex justify-center">
+              <GlassJarSvg pct={pct} liquidColor={liquidColor} flash={flash} />
+              {coinDrops.map(d => (
+                <CoinDrop key={d.id} id={d.id} color={d.color} />
+              ))}
+            </div>
           </div>
-        )}
+
+          <div className="text-center" style={{ fontFamily: "'Fraunces', serif", color: '#fff', fontSize: 14 }}>
+            {fmtIDR(total)}
+          </div>
+
+          <div className="w-48">
+            <ProgressBar pct={pct} color={liquidColor} />
+            <div className="flex justify-between mt-1" style={{ fontFamily: "'Fraunces', serif", fontSize: 7, color: '#666' }}>
+              <span>{fmtIDR(total)}</span>
+              <span>{fmtIDR(goal)}</span>
+            </div>
+          </div>
+
+          {milestone && (
+            <div
+              key={milestone + confettiBurst}
+              className="gj-milestone-pop gj-anim px-3 py-1.5 rounded-lg"
+              style={{
+                background: `${liquidColor}20`,
+                border: `1px solid ${liquidColor}`,
+                fontFamily: "'Fraunces', serif",
+                fontSize: 9,
+                color: liquidColor,
+                animationDuration: '2.4s',
+              }}
+            >
+              {milestone}
+            </div>
+          )}
+        </div>
       </div>
+
+      {toast && (
+        <div
+          key={toast.id}
+          className="gj-toast-bar gj-anim absolute left-1/2 -translate-x-1/2"
+          style={{
+            bottom: -36,
+            background: 'rgba(0,0,0,0.85)',
+            border: `1px solid ${liquidColor}40`,
+            padding: '6px 14px',
+            borderRadius: 8,
+            whiteSpace: 'nowrap',
+            animationDuration: '0.3s',
+          }}
+        >
+          {combo > 1 && (
+            <span className="mr-1 px-1 py-0.5 rounded-full" style={{ background: liquidColor, color: '#000', fontFamily: "'Fraunces', serif", fontSize: 7 }}>
+              x{combo}
+            </span>
+          )}
+          <span style={{ fontFamily: "'Fraunces', serif", fontSize: 9, color: liquidColor }}>
+            {toast.name} · {fmtIDR(toast.amount)}
+          </span>
+        </div>
+      )}
     </div>
   )
 
