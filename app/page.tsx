@@ -17,6 +17,11 @@ export const listOverlay = [
     name: 'Starting Soon',
     description: 'Animasi text fullscreen + countdown',
     href: '/starting',
+  },
+  {
+    name: 'Live Chat',
+    description: 'TikTok live chat overlay • realtime',
+    href: '/chat',
   }
 ]
 export default function HomePage() {
