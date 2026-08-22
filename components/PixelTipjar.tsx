@@ -367,7 +367,7 @@ export function PixelTipjarCustomizer() {
       className={shake ? 'ptj-shake ptj-anim' : ''}
       style={{ animationDuration: shake ? '450ms' : undefined }}
     >
-      <div className="flex flex-col items-center gap-3" style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+      <div className="flex flex-col items-center gap-3" style={{ zoom: scale }}>
         {topSupporter && (
           <div
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
