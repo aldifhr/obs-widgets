@@ -7,6 +7,7 @@ import { SectionTitle } from '../lib/platforms'
 export function WinLoss() {
   const searchParams = useSearchParams()
   const showWidget = searchParams.has('hide')
+  const isDock = searchParams.has('dock')
 
   useEffect(() => {
     if (showWidget) {
@@ -38,6 +39,25 @@ export function WinLoss() {
 
   useEffect(() => { localStorage.setItem('wl-wins', String(wins)) }, [wins])
   useEffect(() => { localStorage.setItem('wl-losses', String(losses)) }, [losses])
+
+  // SSE — sync with overlay + dock + API
+  useEffect(() => {
+    const es = new EventSource('/api/winloss')
+    es.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data)
+        if (data.kind === 'win') setWins(v => v + (data.delta || 1))
+        if (data.kind === 'loss') setLosses(v => v + (data.delta || 1))
+        if (data.kind === 'reset') { setWins(0); setLosses(0) }
+        if (data.kind === 'set') { setWins(data.wins || 0); setLosses(data.losses || 0) }
+      } catch {}
+    }
+    return () => es.close()
+  }, [])
+
+  const apiWin = (d = 1) => fetch('/api/winloss', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'win', delta: d }) })
+  const apiLoss = (d = 1) => fetch('/api/winloss', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'loss', delta: d }) })
+  const apiReset = () => fetch('/api/winloss', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'reset' }) })
 
   const total = wins + losses
   const winrate = total === 0 ? 0 : (wins / total) * 100
@@ -82,6 +102,39 @@ export function WinLoss() {
     )
   }
 
+  if (isDock) {
+    return (
+      <div className="min-h-screen bg-studio-900 p-4 flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accent}15`, color: accent, fontFamily: "'Fraunces', serif", fontSize: 14 }}>W</div>
+          <div>
+            <div className="text-white font-display font-semibold text-sm">Win / Loss Dock</div>
+            <div className="text-zinc-500 text-[10px] font-mono">{total} match • {winrate.toFixed(1)}% WR</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-studio-800/50 border border-studio-border rounded-xl p-3 text-center">
+            <div className="text-[10px] font-mono tracking-widest text-emerald-400 font-bold">WIN</div>
+            <div className="text-white font-display font-bold text-3xl">{wins}</div>
+            <div className="flex gap-1 mt-2">
+              <button onClick={() => apiWin(-1) && setWins(v => Math.max(0, v - 1))} className="flex-1 h-8 rounded-lg bg-studio-700 text-white">−</button>
+              <button onClick={() => apiWin(1) && setWins(v => v + 1)} className="flex-1 h-8 rounded-lg text-black font-bold" style={{ background: accent }}>+</button>
+            </div>
+          </div>
+          <div className="bg-studio-800/50 border border-studio-border rounded-xl p-3 text-center">
+            <div className="text-[10px] font-mono tracking-widest text-red-400 font-bold">LOSS</div>
+            <div className="text-white font-display font-bold text-3xl">{losses}</div>
+            <div className="flex gap-1 mt-2">
+              <button onClick={() => apiLoss(-1) && setLosses(v => Math.max(0, v - 1))} className="flex-1 h-8 rounded-lg bg-studio-700 text-white">−</button>
+              <button onClick={() => apiLoss(1) && setLosses(v => v + 1)} className="flex-1 h-8 rounded-lg bg-red-500 text-white font-bold">+</button>
+            </div>
+          </div>
+        </div>
+        <button onClick={() => apiReset() && (setWins(0), setLosses(0))} className="w-full py-2 rounded-xl border border-studio-border bg-studio-800/50 text-red-400 text-xs font-medium hover:bg-studio-800">Reset</button>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-studio-950 flex flex-col">
       <div className="flex-1 flex flex-col lg:flex-row">
@@ -108,17 +161,17 @@ export function WinLoss() {
                 <div>
                   <SectionTitle>Win</SectionTitle>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setWins(v => Math.max(0, v - 1))} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">−</button>
+                    <button onClick={() => { apiWin(-1); setWins(v => Math.max(0, v - 1)) }} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">−</button>
                     <div className="flex-1 text-center text-white font-display font-bold text-xl">{wins}</div>
-                    <button onClick={() => setWins(v => v + 1)} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">+</button>
+                    <button onClick={() => { apiWin(1); setWins(v => v + 1) }} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">+</button>
                   </div>
                 </div>
                 <div>
                   <SectionTitle>Loss</SectionTitle>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setLosses(v => Math.max(0, v - 1))} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">−</button>
+                    <button onClick={() => { apiLoss(-1); setLosses(v => Math.max(0, v - 1)) }} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">−</button>
                     <div className="flex-1 text-center text-white font-display font-bold text-xl">{losses}</div>
-                    <button onClick={() => setLosses(v => v + 1)} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">+</button>
+                    <button onClick={() => { apiLoss(1); setLosses(v => v + 1) }} className="w-9 h-9 rounded-xl border border-studio-border bg-studio-800/50 text-zinc-400 hover:bg-studio-800 hover:text-white flex items-center justify-center text-lg">+</button>
                   </div>
                 </div>
               </div>
@@ -137,17 +190,22 @@ export function WinLoss() {
             </section>
 
             <section>
-              <button onClick={() => { setWins(0); setLosses(0) }} className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] border border-studio-border bg-studio-800/50 text-red-400 hover:bg-studio-800 hover:text-red-300 hover:border-red-400/15">
+              <button onClick={() => { apiReset(); setWins(0); setLosses(0) }} className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] border border-studio-border bg-studio-800/50 text-red-400 hover:bg-studio-800 hover:text-red-300 hover:border-red-400/15">
                 Reset
               </button>
             </section>
           </div>
 
-          <div className="p-6 border-t border-studio-border">
+          <div className="p-6 border-t border-studio-border space-y-3">
             <button onClick={copyUrl} className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] text-studio-950" style={{ background: accent, boxShadow: `0 4px 20px ${accent}30` }}>
               {copied ? 'Copied!' : 'Copy Widget URL'}
             </button>
-            <p className="text-zinc-600 text-[10px] mt-3 font-mono break-all leading-relaxed">{widgetUrl}</p>
+            <p className="text-zinc-600 text-[10px] font-mono break-all leading-relaxed">{widgetUrl}</p>
+            <div className="pt-3 border-t border-studio-border">
+              <p className="text-zinc-500 text-[10px] font-mono mb-1">OBS Dock URL:</p>
+              <p className="text-zinc-600 text-[10px] font-mono break-all leading-relaxed">{typeof window !== 'undefined' ? `${window.location.origin}/winloss?dock=1` : ''}</p>
+              <p className="text-zinc-600 text-[9px] mt-1">OBS → View → Docks → Custom Browser Docks → paste URL</p>
+            </div>
           </div>
         </div>
       </div>
