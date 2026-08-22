@@ -21,105 +21,179 @@
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 999px; }
 
+/* ─── Coin Drop (jar) ─── */
 @keyframes ptj-coin-drop {
-  0% { transform: translateY(-80px); opacity: 0 }
-  10% { opacity: 1 }
-  65% { transform: translateY(2px) }
-  80% { transform: translateY(-3px) }
-  100% { transform: translateY(0) }
+  0%   { transform: translateY(-100px) rotate(0deg) scale(0.5); opacity: 0 }
+  15%  { opacity: 1; transform: translateY(-60px) rotate(90deg) scale(1) }
+  55%  { transform: translateY(4px) rotate(270deg) scale(1.05) }
+  70%  { transform: translateY(-6px) rotate(340deg) scale(0.98) }
+  85%  { transform: translateY(2px) rotate(355deg) scale(1.01) }
+  100% { transform: translateY(0) rotate(360deg) scale(1) }
 }
 
+/* ─── Coin fly arc (pixel jar) ─── */
+@keyframes ptj-coin-fly {
+  0%   { transform: translate(48px, -30px) scale(1); opacity: 0 }
+  15%  { opacity: 1 }
+  50%  { transform: translate(48px, 10px) scale(1.15) }
+  70%  { transform: translate(48px, 30px) scale(0.95) }
+  85%  { transform: translate(48px, 42px) scale(1.02) }
+  100% { transform: translate(48px, 48px) scale(0.8); opacity: 0 }
+}
+
+/* ─── Pixel jar shake ─── */
+@keyframes ptj-shake {
+  0%, 100% { transform: translateX(0) rotate(0deg) }
+  10%  { transform: translateX(-4px) rotate(-0.8deg) }
+  20%  { transform: translateX(3px) rotate(0.6deg) }
+  35%  { transform: translateX(-3px) rotate(-0.4deg) }
+  50%  { transform: translateX(2px) rotate(0.3deg) }
+  65%  { transform: translateX(-1px) rotate(-0.1deg) }
+  80%  { transform: translateX(1px) }
+}
+
+/* ─── Pixel jar milestone pop ─── */
+@keyframes ptj-milestone-pop {
+  0%   { transform: scale(0.3) rotate(-5deg); opacity: 0 }
+  25%  { transform: scale(1.15) rotate(2deg); opacity: 1 }
+  45%  { transform: scale(0.95) rotate(-1deg) }
+  60%  { transform: scale(1.05) rotate(0.5deg) }
+  75%  { transform: scale(0.98) }
+  85%  { transform: scale(1); opacity: 1 }
+  100% { transform: scale(0.9) rotate(0deg); opacity: 0 }
+}
+
+/* ─── Toast in/out ─── */
 @keyframes ptj-toast-in {
-  0% { transform: translateY(12px); opacity: 0; filter: blur(4px) }
-  100% { transform: translateY(0); opacity: 1; filter: blur(0) }
+  0%   { transform: translateY(16px) scale(0.92); opacity: 0; filter: blur(6px) }
+  60%  { transform: translateY(-2px) scale(1.02); opacity: 1; filter: blur(0) }
+  100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0) }
 }
 
 @keyframes ptj-toast-out {
-  0% { transform: translateY(0); opacity: 1 }
-  100% { transform: translateY(-10px); opacity: 0 }
+  0%   { transform: translateY(0) scale(1); opacity: 1 }
+  100% { transform: translateY(-12px) scale(0.95); opacity: 0; filter: blur(2px) }
 }
 
+/* ─── Blink (cursor) ─── */
 @keyframes ptj-blink {
   0%, 49% { opacity: 1 }
   50%, 100% { opacity: 0 }
 }
 
+/* ─── Float up (generic) ─── */
 @keyframes ptj-float {
-  0% { transform: translateY(0); opacity: 1 }
-  100% { transform: translateY(-36px); opacity: 0 }
+  0%   { transform: translateY(0) scale(1); opacity: 1 }
+  50%  { opacity: 0.8 }
+  100% { transform: translateY(-50px) scale(0.7); opacity: 0 }
 }
 
+/* ─── Confetti burst ─── */
 @keyframes ptj-confetti {
-  0% { transform: translate(0, 0) rotate(0deg); opacity: 1 }
-  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0 }
+  0%   { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1 }
+  30%  { opacity: 1 }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.3); opacity: 0 }
 }
 
+/* ─── Floating heart/gift (organic sway + rise) ─── */
 @keyframes ptj-heart-float {
-  0% { transform: translateY(0) scale(1); opacity: 1 }
-  100% { transform: translateY(-60px) scale(1.3); opacity: 0 }
+  0%   { transform: translateY(0) translateX(0) scale(0.4); opacity: 0 }
+  10%  { transform: translateY(-10px) translateX(2px) scale(1.1); opacity: 1 }
+  30%  { transform: translateY(-30px) translateX(-4px) scale(1) }
+  50%  { transform: translateY(-50px) translateX(3px) scale(0.95) }
+  70%  { transform: translateY(-70px) translateX(-2px) scale(0.9) }
+  100% { transform: translateY(-100px) translateX(1px) scale(0.8); opacity: 0 }
 }
 
+/* ─── Glass jar: coin drop with spin ─── */
 @keyframes gj-coin-drop {
-  0% { transform: translateY(-80px) translateX(-50%); opacity: 0 }
-  10% { opacity: 1 }
-  65% { transform: translateY(2px) translateX(-50%) }
-  80% { transform: translateY(-3px) translateX(-50%) }
-  100% { transform: translateY(0) translateX(-50%) }
+  0%   { transform: translateY(-100px) translateX(-50%) rotate(0deg) scale(0.5); opacity: 0 }
+  15%  { opacity: 1; transform: translateY(-60px) translateX(-50%) rotate(90deg) scale(1) }
+  55%  { transform: translateY(4px) translateX(-50%) rotate(270deg) scale(1.05) }
+  70%  { transform: translateY(-6px) translateX(-50%) rotate(340deg) scale(0.98) }
+  85%  { transform: translateY(2px) translateX(-50%) rotate(355deg) scale(1.01) }
+  100% { transform: translateY(0) translateX(-50%) rotate(360deg) scale(1) }
 }
 
+/* ─── Glass jar: toast bar slide up ─── */
 @keyframes gj-toast-bar {
-  0% { transform: translateY(100%); opacity: 0 }
-  100% { transform: translateY(0); opacity: 1 }
+  0%   { transform: translateY(100%) scaleY(0.3); opacity: 0 }
+  50%  { transform: translateY(-4%) scaleY(1.02); opacity: 1 }
+  100% { transform: translateY(0) scaleY(1); opacity: 1 }
 }
 
+/* ─── Glass jar: confetti ─── */
 @keyframes gj-confetti {
-  0% { transform: translate(0, 0) rotate(0deg); opacity: 1 }
-  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0 }
+  0%   { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1 }
+  30%  { opacity: 1 }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.3); opacity: 0 }
 }
 
+/* ─── Glass jar: floating gift/like ─── */
 @keyframes gj-heart-float {
-  0% { transform: translateY(0) scale(1); opacity: 1 }
-  100% { transform: translateY(-60px) scale(1.3); opacity: 0 }
+  0%   { transform: translateY(0) translateX(0) scale(0.4); opacity: 0 }
+  10%  { transform: translateY(-10px) translateX(2px) scale(1.1); opacity: 1 }
+  30%  { transform: translateY(-30px) translateX(-4px) scale(1) }
+  50%  { transform: translateY(-50px) translateX(3px) scale(0.95) }
+  70%  { transform: translateY(-70px) translateX(-2px) scale(0.9) }
+  100% { transform: translateY(-100px) translateX(1px) scale(0.8); opacity: 0 }
 }
 
+/* ─── Milestone pop (elastic spring) ─── */
 @keyframes gj-milestone-pop {
-  0% { transform: scale(0.6); opacity: 0 }
-  20% { transform: scale(1.1); opacity: 1 }
-  40% { transform: scale(1) }
-  80% { transform: scale(1); opacity: 1 }
-  100% { transform: scale(0.9); opacity: 0 }
+  0%   { transform: scale(0.3) rotate(-5deg); opacity: 0 }
+  25%  { transform: scale(1.15) rotate(2deg); opacity: 1 }
+  45%  { transform: scale(0.95) rotate(-1deg) }
+  60%  { transform: scale(1.05) rotate(0.5deg) }
+  75%  { transform: scale(0.98) }
+  85%  { transform: scale(1); opacity: 1 }
+  100% { transform: scale(0.9) rotate(0deg); opacity: 0 }
 }
 
+/* ─── Jar shake (weight + momentum) ─── */
 @keyframes gj-shake {
-  0%, 100% { transform: translateX(0) }
-  15% { transform: translateX(-6px) rotate(-0.5deg) }
-  30% { transform: translateX(5px) rotate(0.4deg) }
-  45% { transform: translateX(-4px) rotate(-0.3deg) }
-  60% { transform: translateX(3px) rotate(0.2deg) }
-  75% { transform: translateX(-2px) }
+  0%, 100% { transform: translateX(0) rotate(0deg) }
+  10%  { transform: translateX(-8px) rotate(-1deg) }
+  20%  { transform: translateX(7px) rotate(0.8deg) }
+  35%  { transform: translateX(-5px) rotate(-0.6deg) }
+  50%  { transform: translateX(4px) rotate(0.4deg) }
+  65%  { transform: translateX(-2px) rotate(-0.2deg) }
+  80%  { transform: translateX(1px) }
 }
 
+/* ─── Ledger: row slide in ─── */
 @keyframes ledger-row-in {
-  0% { transform: translateX(-12px); opacity: 0 }
-  100% { transform: translateX(0); opacity: 1 }
+  0%   { transform: translateX(-16px); opacity: 0; filter: blur(2px) }
+  60%  { transform: translateX(2px); opacity: 1; filter: blur(0) }
+  100% { transform: translateX(0); opacity: 1; filter: blur(0) }
 }
 
+/* ─── Ledger: toast in ─── */
 @keyframes ledger-toast-in {
-  0% { transform: translateY(8px); opacity: 0 }
-  100% { transform: translateY(0); opacity: 1 }
+  0%   { transform: translateY(10px) scale(0.95); opacity: 0 }
+  60%  { transform: translateY(-1px) scale(1.01); opacity: 1 }
+  100% { transform: translateY(0) scale(1); opacity: 1 }
 }
 
+/* ─── Ledger: total pulse ─── */
 @keyframes ledger-pulse {
-  0%, 100% { transform: scale(1) }
-  50% { transform: scale(1.05) }
+  0%, 100% { transform: scale(1); text-shadow: none }
+  50%  { transform: scale(1.06); text-shadow: 0 0 16px var(--pulse-color, rgba(255,197,61,0.3)) }
 }
 
+/* ─── Pulse glow (jar) ─── */
 @keyframes ptj-pulse-glow {
   0%, 100% { box-shadow: 0 0 12px rgba(255,197,61,0.15) }
-  50% { box-shadow: 0 0 24px rgba(255,197,61,0.35) }
+  50%  { box-shadow: 0 0 32px rgba(255,197,61,0.4), 0 0 64px rgba(255,197,61,0.15) }
 }
 
+/* ─── Liquid wave (jar) ─── */
+@keyframes liquid-wave {
+  0%, 100% { d: path("M0,8 Q35,4 70,8 T140,8 L140,16 L0,16 Z") }
+  50%      { d: path("M0,8 Q35,12 70,8 T140,8 L140,16 L0,16 Z") }
+}
+
+/* ─── Reduced motion ─── */
 @media (prefers-reduced-motion: reduce) {
-  .ptj-anim { animation: none !important; transition: none !important; }
-  .gj-anim { animation: none !important; transition: none !important; }
+  .ptj-anim, .gj-anim { animation: none !important; transition: none !important; }
 }
