@@ -143,6 +143,7 @@ export function GlassJar() {
     return v > 0 ? v : 500000
   })
   const [liquidColor, setLiquidColor] = useState(searchParams.get('liquid') || '#FFC53D')
+  const accent = '#FFC53D'
   const [noBg, setNoBg] = useState(searchParams.has('nobg'))
   const [scale, setScale] = useState(() => {
     const v = Number(searchParams.get('scale'))
@@ -155,7 +156,6 @@ export function GlassJar() {
   const [copied, setCopied] = useState(false)
 
   const [total, setTotal] = useState(0)
-  const [toast, setToast] = useState<{ name: string; amount: number; message: string; id: string } | null>(null)
   const [flash, setFlash] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
   const [confettiBurst, setConfettiBurst] = useState(0)
@@ -271,7 +271,7 @@ export function GlassJar() {
           {topSupporter && (
             <div
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-              style={{ background: 'rgba(0,0,0,0.5)', border: `1px solid ${liquidColor}40`, fontFamily: "'Fraunces', serif", fontSize: 11, color: liquidColor }}
+              style={{ background: 'rgba(0,0,0,0.5)', border: `1px solid ${accent}40`, fontFamily: "'Fraunces', serif", fontSize: 11, color: accent }}
             >
               <span>{'\u{1F451}'}</span>
               <span>{topSupporter.name}</span>
@@ -294,7 +294,7 @@ export function GlassJar() {
           </div>
 
           <div className="w-48">
-            <ProgressBar pct={pct} color={liquidColor} />
+            <ProgressBar pct={pct} color={accent} />
             <div className="flex justify-between mt-1" style={{ fontFamily: "'Fraunces', serif", fontSize: 7, color: '#666' }}>
               <span>{fmtIDR(total)}</span>
               <span>{fmtIDR(goal)}</span>
@@ -306,11 +306,11 @@ export function GlassJar() {
               key={milestone + confettiBurst}
               className="gj-milestone-pop gj-anim px-3 py-1.5 rounded-lg"
               style={{
-                background: `${liquidColor}20`,
-                border: `1px solid ${liquidColor}`,
+                background: `${accent}20`,
+                border: `1px solid ${accent}`,
                 fontFamily: "'Fraunces', serif",
                 fontSize: 9,
-                color: liquidColor,
+                color: accent,
                 animationDuration: '2.4s',
               }}
             >
@@ -352,7 +352,7 @@ export function GlassJar() {
     return (
       <div className="flex items-center justify-center p-6" style={{ minHeight: '100vh' }}>
         {noBg ? content : (
-          <div className="rounded-2xl p-6 relative" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', border: `1px solid ${liquidColor}20` }}>
+          <div className="rounded-2xl p-6 relative" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', border: `1px solid ${accent}20` }}>
             {content}
           </div>
         )}
@@ -370,7 +370,7 @@ export function GlassJar() {
         <div className="w-full lg:w-[380px] bg-studio-900 border-l border-studio-border flex flex-col">
           <div className="p-6 border-b border-studio-border">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${liquidColor}15`, color: liquidColor }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${accent}15`, color: accent }}>
                 <span style={{ fontFamily: "'Fraunces', serif", fontSize: 14 }}>{'\u{1F48E}'}</span>
               </div>
               <div>
@@ -407,12 +407,12 @@ export function GlassJar() {
 
             <section>
               <SectionTitle>Scale <span className="text-zinc-600 font-mono font-normal ml-1">{scale.toFixed(1)}x</span></SectionTitle>
-              <input type="range" min="0.5" max="2" step="0.1" value={scale} onChange={e => setScale(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: liquidColor }} />
+              <input type="range" min="0.5" max="2" step="0.1" value={scale} onChange={e => setScale(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: accent }} />
             </section>
 
             <section>
               <SectionTitle>Toast Duration <span className="text-zinc-600 font-mono font-normal ml-1">{(toastDur / 1000).toFixed(1)}s</span></SectionTitle>
-              <input type="range" min="2000" max="10000" step="500" value={toastDur} onChange={e => setToastDur(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: liquidColor }} />
+              <input type="range" min="2000" max="10000" step="500" value={toastDur} onChange={e => setToastDur(Number(e.target.value))} className="w-full h-1.5 bg-studio-700 rounded-full appearance-none cursor-pointer" style={{ accentColor: accent }} />
             </section>
 
             <section>
@@ -438,7 +438,7 @@ export function GlassJar() {
           </div>
 
           <div className="p-6 border-t border-studio-border">
-            <button onClick={copyUrl} className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] text-studio-950" style={{ background: liquidColor, boxShadow: `0 4px 20px ${liquidColor}30` }}>
+            <button onClick={copyUrl} className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] text-studio-950" style={{ background: accent, boxShadow: `0 4px 20px ${accent}30` }}>
               {copied ? 'Copied!' : 'Copy Widget URL'}
             </button>
             <p className="text-zinc-600 text-[10px] mt-3 font-mono break-all leading-relaxed">{widgetUrl}</p>
