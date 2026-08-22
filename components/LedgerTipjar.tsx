@@ -39,7 +39,11 @@ export function LedgerTipjar() {
   const [copied, setCopied] = useState(false)
   const [total, setTotal] = useState(0)
   const [rows, setRows] = useState<LedgerRow[]>([])
+  const [toast, setToast] = useState<{ name: string; amount: number } | null>(null)
+  const [pulse, setPulse] = useState(false)
+  const [newRow, setNewRow] = useState<number | null>(null)
   const toastTimer = useRef<number>(0)
+  const rowsRef = useRef<HTMLDivElement>(null)
   const t = themes[mode]
 
   useEffect(() => {
@@ -55,8 +59,14 @@ export function LedgerTipjar() {
     setTotal(t => t + e.amount)
     const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
     setRows(r => [{ name: e.name, amount: e.amount, time: now }, ...r].slice(0, 20))
+    setNewRow(Date.now())
+    setTimeout(() => setNewRow(null), 500)
+    if (rowsRef.current) rowsRef.current.scrollTop = 0
+    setPulse(true)
+    setTimeout(() => setPulse(false), 400)
+    setToast({ name: e.name, amount: e.amount })
     clearTimeout(toastTimer.current)
-    toastTimer.current = window.setTimeout(() => {}, 5000)
+    toastTimer.current = window.setTimeout(() => setToast(null), 4000)
   }, [])
 
   const handleFakeTip = useCallback(() => {
@@ -77,10 +87,16 @@ export function LedgerTipjar() {
   const copyUrl = () => { navigator.clipboard.writeText(widgetUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const Ledger = () => (
-    <div style={{ width: '100%', maxWidth: 320, background: t.card, borderRadius: 4, boxShadow: t.shadow, display: 'flex', flexDirection: 'column', transition: 'background .3s' }}>
+    <div style={{ position: 'relative', width: '100%', maxWidth: 320, background: t.card, borderRadius: 4, boxShadow: t.shadow, display: 'flex', flexDirection: 'column', transition: 'background .3s' }}>
+      {/* toast */}
+      {toast && (
+        <div style={{ position: 'absolute', top: -40, left: '50%', transform: 'translateX(-50%)', background: mode === 'dark' ? '#2a2a2e' : '#1B2A4A', color: '#fff', padding: '6px 14px', borderRadius: 8, fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, whiteSpace: 'nowrap', boxShadow: '0 4px 16px rgba(0,0,0,0.3)', animation: 'ledger-toast-in 0.3s ease', zIndex: 10 }}>
+          {toast.name} · {fmtIDR(toast.amount)}
+        </div>
+      )}
       <div style={{ padding: '18px 20px 10px', borderBottom: `1px dashed ${t.border}` }}>
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: 2, color: t.eyebrow, fontWeight: 600 }}>BUKU TIP · LIVE</div>
-        <div style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: 30, color: t.total }}>{fmtIDR(total)}</div>
+        <div style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: 30, color: t.total, animation: pulse ? 'ledger-pulse 0.4s ease' : undefined }}>{fmtIDR(total)}</div>
         <div style={{ height: 4, background: t.meter, marginTop: 10, position: 'relative', borderRadius: 2 }}>
           <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct * 100}%`, background: t.meterFill, transition: 'width .6s', borderRadius: 2 }} />
         </div>
@@ -89,10 +105,10 @@ export function LedgerTipjar() {
           <span>{fmtIDR(goal)}</span>
         </div>
       </div>
-      <div style={{ maxHeight: 210, overflowY: 'auto', padding: '6px 20px 14px', fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: t.rowText }}>
+      <div ref={rowsRef} style={{ maxHeight: 210, overflowY: 'auto', padding: '6px 20px 14px', fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: t.rowText }}>
         {rows.length === 0 && <div style={{ color: t.empty, fontSize: 11, padding: '8px 0' }}>Belum ada transaksi.</div>}
         {rows.map((r, i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '5px 0', borderBottom: `1px dotted ${t.rowBorder}` }}>
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '5px 0', borderBottom: `1px dotted ${t.rowBorder}`, animation: i === 0 && newRow ? 'ledger-row-in 0.4s ease' : undefined, background: i === 0 && newRow ? (mode === 'dark' ? '#ffffff08' : '#D4A01710') : undefined, borderRadius: 4 }}>
             <span>{r.time} · {r.name}</span>
             <span style={{ color: t.rowAmt, fontWeight: 600 }}>+{fmtIDR(r.amount)}</span>
           </div>
