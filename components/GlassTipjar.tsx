@@ -63,6 +63,8 @@ function GlassJarSvg({ pct, liquidColor, flash }: { pct: number; liquidColor: st
       </g>
       <rect x={16} y={30} width={8} height={120} rx={4} fill="rgba(255,255,255,0.35)" />
       <rect x={28} y={30} width={4} height={40} rx={2} fill="rgba(255,255,255,0.2)" />
+      <rect x={68} y={28} width={3} height={100} rx={1.5} fill="rgba(255,255,255,0.12)" />
+      <rect x={108} y={30} width={6} height={80} rx={3} fill="rgba(255,255,255,0.08)" />
     </svg>
   )
 }
@@ -388,10 +390,6 @@ export function GlassJar() {
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="text-center" style={{ fontFamily: "'Fraunces', serif", color: liquidColor, fontSize: 11, letterSpacing: 1 }}>
-          TOPLES DUKUNGAN
         </div>
 
         {likeCount > 0 && (

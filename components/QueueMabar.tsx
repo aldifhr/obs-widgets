@@ -33,10 +33,12 @@ export function QueueMabar() {
   const [maxQueue, setMaxQueue] = useState(() => { const v = Number(searchParams.get('max')); return v > 0 ? v : 5 })
   const [copied, setCopied] = useState(false)
   const [queue, setQueue] = useState<QueueEntry[]>(() => { const v = localStorage.getItem('mabar-queue'); return v ? JSON.parse(v) : [] })
+  const [matchCount, setMatchCount] = useState(() => { const v = localStorage.getItem('mabar-match'); return v ? Number(v) : 0 })
   const [toast, setToast] = useState<string | null>(null)
   const [pulse, setPulse] = useState(false)
   const [newRow, setNewRow] = useState<number | null>(null)
   const [stamped, setStamped] = useState(false)
+  const [inputName, setInputName] = useState('')
   const toastTimer = useRef<number>(0)
   const queueRef = useRef<HTMLDivElement>(null)
   const t = themes[mode]
@@ -52,6 +54,10 @@ export function QueueMabar() {
   useEffect(() => {
     localStorage.setItem('mabar-queue', JSON.stringify(queue))
   }, [queue])
+
+  useEffect(() => {
+    localStorage.setItem('mabar-match', String(matchCount))
+  }, [matchCount])
 
   const addToQueue = useCallback((name: string) => {
     if (queue.length >= maxQueue) return
@@ -85,6 +91,13 @@ export function QueueMabar() {
     addToQueue(name)
   }, [queue, addToQueue])
 
+  const handleManualAdd = useCallback(() => {
+    const name = inputName.trim()
+    if (!name) return
+    addToQueue(name)
+    setInputName('')
+  }, [inputName, addToQueue])
+
   const full = queue.length >= maxQueue
 
   const widgetParams = new URLSearchParams({ mode, max: String(maxQueue), hide: '1' })
@@ -96,9 +109,17 @@ export function QueueMabar() {
     <div style={{ width: '100%', maxWidth: 320, background: t.card, borderRadius: 4, boxShadow: t.shadow, display: 'flex', flexDirection: 'column', transition: 'background .3s', overflow: 'hidden' }}>
       <div style={{ padding: '18px 20px 10px', borderBottom: `1px dashed ${t.border}` }}>
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: 2, color: t.eyebrow, fontWeight: 600 }}>ANTRIAN MABAR · LIVE</div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 4 }}>
           <div style={{ fontFamily: "'IBM Plex Sans Condensed', sans-serif", fontWeight: 700, fontSize: 30, color: t.total, animation: pulse ? 'ledger-pulse 0.4s ease' : undefined }}>
             {queue.length}<span style={{ fontSize: 14, color: t.sub, fontWeight: 400 }}>/{maxQueue}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: "'IBM Plex Mono', monospace" }}>
+            <button onClick={() => setMatchCount(m => Math.max(0, m - 1))} style={{ width: 22, height: 22, borderRadius: 4, border: `1px solid ${t.border}`, background: 'transparent', color: t.sub, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+            <div style={{ textAlign: 'center', minWidth: 28 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: t.accent }}>{matchCount}</div>
+              <div style={{ fontSize: 7, color: t.sub, letterSpacing: 1 }}>MATCH</div>
+            </div>
+            <button onClick={() => setMatchCount(m => m + 1)} style={{ width: 22, height: 22, borderRadius: 4, border: `1px solid ${t.border}`, background: 'transparent', color: t.sub, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
           </div>
         </div>
         <div style={{ height: 4, background: t.sub + '15', marginTop: 10, position: 'relative', borderRadius: 2 }}>
