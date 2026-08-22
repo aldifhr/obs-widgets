@@ -13,6 +13,35 @@ const BASE_Y = 89
 const MAX_COINS = 40
 const MILESTONES = [0.25, 0.5, 0.75, 1]
 
+const GIFT_IMAGES: Record<string, string> = {
+  Rose: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eba3a9bb85c33e017f3648eaf88d7189~tplv-obj.webp',
+  GG: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/3f02fa9594bd1495ff4e8aa5ae265eef~tplv-obj.webp',
+  Heart: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/dd300fd35a757d751301fba862a258f1~tplv-obj.webp',
+  'Finger Heart': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/a4c4dc437fd3a6632aba149769491f49.png~tplv-obj.webp',
+  'Thumbs Up': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/570a663e27bdc460e05556fd1596771a~tplv-obj.webp',
+  'Love you so much': 'https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/fc549cf1bc61f9c8a1c97ebab68dced7.png~tplv-obj.webp',
+  'Love you': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/ab0a7b44bfc140923bb74164f6f880ab~tplv-obj.webp',
+  'Ice Cream Cone': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/968820bc85e274713c795a6aef3f7c67~tplv-obj.webp',
+  'Cake Slice': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/f681afb4be36d8a321eac741d387f1e2~tplv-obj.webp',
+  'Birthday Cake': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/3ac5ec732f6f4ba7b1492248bfea83d6~tplv-obj.webp',
+  'Heart Me': 'https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/composed.b326356a360b67b367c5cae58fe337b1.png~tplv-obj.webp',
+  'Heart Puff': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/68c21ef420f49b87543de354b2e30b8d.png~tplv-obj.webp',
+  'Flame heart': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/b199d028d5beb081fe16edcf77db0830~tplv-obj.webp',
+  Coffee: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/02492214b9bd50fee2d69fd0d089c025~tplv-obj.webp',
+  'Orange Juice': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/7244832db46b7ea5d7d6e280719ddea2~tplv-obj.webp',
+  Fire: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/687759237d5a115183ae45fa7520b925.png~tplv-obj.webp',
+  Star: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/16a55cac42880dc55be5d8ea716f0a61~tplv-obj.webp',
+  Candy: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/574c341e7f8edadbdabf3b3d409b3bc0~tplv-obj.webp',
+  'Blow a kiss': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/cdb55940740d5c83879b2934f9a7d08e~tplv-obj.webp',
+  'Lightning Bolt': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/659092e3e787546afe7aee68ed04f897~tplv-obj.webp',
+  'Ice Cube': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/127b9e1d92a2c26e4c647978badf7c72~tplv-obj.webp',
+  Football: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/c043cd9e418f13017793ddf6e0c6ee99~tplv-obj.webp',
+  Basketball: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/a3c4986dc501ba6d1d5ee257d4f29dc8~tplv-obj.webp',
+  Rainbow: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/644f6029df42ac078e6f13de19c6640c.png~tplv-obj.webp',
+  'Fairy wings': 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/e504dc2f313b8c6df9e99a848e1b3a99.png~tplv-obj.webp',
+}
+const DEFAULT_GIFT_IMG = 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eba3a9bb85c33e017f3648eaf88d7189~tplv-obj.webp'
+
 function coinSlot(i: number) {
   const col = i % 4
   const row = Math.floor(i / 4)
@@ -214,6 +243,7 @@ export function PixelTipjarCustomizer() {
   const [topSupporter, setTopSupporter] = useState<{ name: string; total: number } | null>(null)
   const [likeCount, setLikeCount] = useState(0)
   const [hearts, setHearts] = useState<{ id: string; x: number }[]>([])
+  const [floatingGifts, setFloatingGifts] = useState<{ id: string; x: number; img: string }[]>([])
 
   const toastTimer = useRef<number>(0)
   const milestoneTimer = useRef<number>(0)
@@ -233,26 +263,22 @@ export function PixelTipjarCustomizer() {
   const handleEvent = useCallback((e: TakoEvent) => {
     if (e.kind === 'like') {
       setLikeCount(c => c + e.count)
-      setCoinItems(coins => [...coins, ...Array.from({ length: Math.max(1, Math.round(e.count / 2)) }, () => ({ source: 'tiktok' }))].slice(-MAX_COINS))
-      setFlash(true)
-      setTimeout(() => setFlash(false), 400)
-      const id = 'heart-' + Date.now() + '-' + Math.random()
+      const id = 'like-' + Date.now() + '-' + Math.random()
       const x = 20 + Math.random() * 60
-      setHearts(h => [...h.slice(-8), { id, x }])
+      setHearts(h => [...h.slice(-5), { id, x }])
       setTimeout(() => setHearts(h => h.filter(h => h.id !== id)), 1500)
       return
     }
     if (e.kind === 'gift') {
       setTotal(t => t + e.diamondCount)
-      setCoinItems(coins => [...coins, ...Array.from({ length: Math.max(1, Math.round(e.diamondCount / 5)) }, () => ({ source: 'tiktok' }))].slice(-MAX_COINS))
+      const img = GIFT_IMAGES[e.giftName] || DEFAULT_GIFT_IMG
+      const id = 'gift-' + Date.now() + '-' + Math.random()
+      const x = 20 + Math.random() * 60
+      setFloatingGifts(g => [...g.slice(-3), { id, x, img }])
+      setTimeout(() => setFloatingGifts(g => g.filter(g => g.id !== id)), 2000)
       setFlash(true)
       setTimeout(() => setFlash(false), 600)
-
       const now = Date.now()
-      const flyId = e.id + '-fly-' + now
-      setFlyingCoin({ id: flyId })
-      setTimeout(() => setFlyingCoin(f => (f?.id === flyId ? null : f)), 700)
-
       setToast({ name: e.user, amount: e.diamondCount, message: `${e.giftName} x${e.repeatCount}`, id: e.id + '-' + now })
       clearTimeout(toastTimer.current)
       toastTimer.current = window.setTimeout(() => setToast(null), toastDur)
@@ -365,12 +391,25 @@ export function PixelTipjarCustomizer() {
                 style={{
                   left: `${h.x}%`,
                   bottom: '80%',
-                  fontSize: 16,
                   animationDuration: '1.5s',
                   animationFillMode: 'forwards',
                 }}
               >
-                ❤️
+                <img src="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/570a663e27bdc460e05556fd1596771a~tplv-obj.webp" alt="like" className="w-6 h-6" style={{ imageRendering: 'auto' }} />
+              </div>
+            ))}
+            {floatingGifts.map(g => (
+              <div
+                key={g.id}
+                className="absolute ptj-heart-float ptj-anim"
+                style={{
+                  left: `${g.x}%`,
+                  bottom: '80%',
+                  animationDuration: '2s',
+                  animationFillMode: 'forwards',
+                }}
+              >
+                <img src={g.img} alt="gift" className="w-8 h-8" style={{ imageRendering: 'auto' }} />
               </div>
             ))}
           </div>
